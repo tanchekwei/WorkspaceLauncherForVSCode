@@ -1,6 +1,4 @@
-﻿// Copyright (c) Jonah Fintz. Licensed under the MIT License.
-
-namespace CmdPalVsCode;
+﻿namespace CmdPalVsCode;
 
 /// <summary>
 /// Represents a Visual Studio Code workspace.

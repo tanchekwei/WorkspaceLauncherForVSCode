@@ -1,6 +1,4 @@
-﻿// Copyright (c) Jonah Fintz. Licensed under the MIT License.
-
-using Microsoft.CommandPalette.Extensions;
+﻿using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 
 namespace CmdPalVsCode;

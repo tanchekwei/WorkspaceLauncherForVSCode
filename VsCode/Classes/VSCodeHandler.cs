@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Data.Sqlite;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -19,8 +20,8 @@ internal static class VSCodeHandler
     {
         var appdataProgramFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var programsFolderPathBase = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-        var defaultStoragePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Code", "User", "globalStorage", "storage.json");
-        var insiderStoragePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Code - Insiders", "User", "globalStorage", "storage.json");
+        var defaultStoragePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Code", "User", "globalStorage");
+        var insiderStoragePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Code - Insiders", "User", "globalStorage");
 
 
         AddInstance("VS Code", Path.Combine(appdataProgramFilesPath, "Programs", "Microsoft VS Code", "Code.exe"), defaultStoragePath, VSCodeInstallationType.User, VSCodeType.Default);
@@ -56,52 +57,66 @@ internal static class VSCodeHandler
         foreach (var instance in Instances)
         {
             // check if storage file exists
-            if (!File.Exists(instance.StoragePath) || !File.Exists(instance.ExecutablePath))
+            if (!File.Exists(instance.ExecutablePath))
             {
                 continue;
             }
 
+            SqliteConnection connection = null;
+            // try getting data from state.vscdb 
             try
             {
-                var jsonContent = File.ReadAllText(instance.StoragePath);
-                var jsonDocument = JsonDocument.Parse(jsonContent);
-                var rootElement = jsonDocument.RootElement;
-
-                if (rootElement.TryGetProperty("backupWorkspaces", out var
-                    backupWorkspaces))
+                var stateFilePath = Path.Combine(instance.StoragePath, "state.vscdb");
+                if (File.Exists(stateFilePath))
                 {
-                    if (backupWorkspaces.TryGetProperty("workspaces", out var workspaces))
+                    connection = new SqliteConnection($"Data Source={Path.Combine(instance.StoragePath, "state.vscdb")};Mode=ReadOnly;");
+                    connection.Open();
+
+                    if (connection.State == System.Data.ConnectionState.Open)
                     {
-                        foreach (var workspace in workspaces.EnumerateArray())
+                        var sqliteCommand = connection.CreateCommand();
+                        sqliteCommand.CommandText = "SELECT value FROM ItemTable WHERE key LIKE 'history.recentlyOpenedPathsList'";
+
+                        var sqliteDataReader = sqliteCommand.ExecuteReader();
+
+                        if (sqliteDataReader.Read())
                         {
-                            if (workspace.TryGetProperty("configURIPath", out var path))
+                            string json = sqliteDataReader.GetString(0);
+                            if (!string.IsNullOrEmpty(json))
                             {
-                                var pathString = path.GetString();
+                                var jsonDocument = JsonDocument.Parse(json);
+                                var rootElement = jsonDocument.RootElement;
 
-                                if (pathString == null || pathString.Split('/').Length == 0)
+                                if (rootElement.TryGetProperty("entries", out var entries))
                                 {
-                                    continue;
+                                    foreach (var entry in entries.EnumerateArray())
+                                    {
+                                        string? pathString = null;
+                                        if (entry.TryGetProperty("folderUri", out var path))
+                                        {
+                                            pathString = path.GetString();
+
+                                            if (pathString == null || pathString.Split('/').Length == 0)
+                                            {
+                                                continue;
+                                            }
+
+                                            outWorkspaces.Add(new VSCodeWorkspace(instance, pathString, VSCodeWorkspaceType.Folder));
+                                        }
+                                        else if (entry.TryGetProperty("workspace", out var workspace))
+                                        {
+                                            if (workspace.TryGetProperty("configPath", out var configPath))
+                                            {
+                                                pathString = configPath.GetString();
+                                                if (pathString == null || pathString.Split('/').Length == 0)
+                                                {
+                                                    continue;
+                                                }
+                                                outWorkspaces.Add(new VSCodeWorkspace(instance, pathString, VSCodeWorkspaceType.Workspace));
+                                            }
+                                        }
+                                    }
                                 }
-
-                                outWorkspaces.Add(new VSCodeWorkspace(instance, pathString, VSCodeWorkspaceType.Workspace));
-                            }
-                        }
-                    }
-
-                    if (backupWorkspaces.TryGetProperty("folders", out var folders))
-                    {
-                        foreach (var folder in folders.EnumerateArray())
-                        {
-                            if (folder.TryGetProperty("folderUri", out var path))
-                            {
-                                var pathString = path.GetString();
-
-                                if (pathString == null || pathString.Split('/').Length == 0)
-                                {
-                                    continue;
-                                }
-
-                                outWorkspaces.Add(new VSCodeWorkspace(instance, pathString, VSCodeWorkspaceType.Folder));
                             }
                         }
                     }
@@ -110,9 +125,88 @@ internal static class VSCodeHandler
             catch (JsonException ex)
             {
                 // Handle JSON parsing error
-                Console.WriteLine($"Error parsing JSON: {ex.Message}");
+                Console.WriteLine($"Error parsing state.vscdb: {ex.Message}");
+            }
+            finally
+            {
+                connection?.Close();
+            }
+
+            // try getting data from storage.json
+            try
+            {
+                var storageFilePath = Path.Combine(instance.StoragePath, "storage.json");
+
+                if (File.Exists(storageFilePath))
+                {
+                    var jsonContent = File.ReadAllText(storageFilePath);
+                    var jsonDocument = JsonDocument.Parse(jsonContent);
+                    var rootElement = jsonDocument.RootElement;
+
+                    if (rootElement.TryGetProperty("backupWorkspaces", out var
+                        backupWorkspaces))
+                    {
+                        if (backupWorkspaces.TryGetProperty("workspaces", out var workspaces))
+                        {
+                            foreach (var workspace in workspaces.EnumerateArray())
+                            {
+                                if (workspace.TryGetProperty("configURIPath", out var path))
+                                {
+                                    var pathString = path.GetString();
+
+                                    if (pathString == null || pathString.Split('/').Length == 0)
+                                    {
+                                        continue;
+                                    }
+
+                                    outWorkspaces.Add(new VSCodeWorkspace(instance, pathString, VSCodeWorkspaceType.Workspace));
+                                }
+                            }
+                        }
+
+                        if (backupWorkspaces.TryGetProperty("folders", out var folders))
+                        {
+                            foreach (var folder in folders.EnumerateArray())
+                            {
+                                if (folder.TryGetProperty("folderUri", out var path))
+                                {
+                                    var pathString = path.GetString();
+
+                                    if (pathString == null || pathString.Split('/').Length == 0)
+                                    {
+                                        continue;
+                                    }
+
+                                    outWorkspaces.Add(new VSCodeWorkspace(instance, pathString, VSCodeWorkspaceType.Folder));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (JsonException ex)
+            {
+                // Handle JSON parsing error
+                Console.WriteLine($"Error parsing storage.json: {ex.Message}");
             }
         }
+
+        // filter out workspaces with duplicate paths
+        var uniqueWorkspaces = new HashSet<string>();
+        outWorkspaces.RemoveAll(workspace =>
+        {
+            var path = workspace.Path;
+            if (uniqueWorkspaces.Contains(path))
+            {
+                // Remove this workspace
+                return true;
+            }
+
+            // Keep this workspace
+            uniqueWorkspaces.Add(path);
+            return false;
+        });
+
         return outWorkspaces;
     }
 }

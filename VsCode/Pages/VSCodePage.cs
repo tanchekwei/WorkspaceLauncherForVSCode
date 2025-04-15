@@ -1,5 +1,6 @@
 using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
+using System;
 using System.Collections.Generic;
 
 namespace CmdPalVsCode;
@@ -50,13 +51,13 @@ internal sealed partial class VSCodePage : ListPage
                     new DetailsElement()
                     {
                         Key = "Path",
-                        Data = new DetailsLink() { Text = workspace.Path },
+                        Data = new DetailsLink() { Text = Uri.UnescapeDataString(workspace.Path) },
                     }
                 }.ToArray(),
             };
 
 
-            items.Add(new ListItem(command) { Title = details.Title, Subtitle = workspace.Path, Details = details, Icon = workspace.Instance.GetIcon() });
+            items.Add(new ListItem(command) { Title = details.Title, Subtitle = Uri.UnescapeDataString(workspace.Path), Details = details, Icon = workspace.Instance.GetIcon() });
         }
 
         IsLoading = false;

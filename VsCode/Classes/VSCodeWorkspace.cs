@@ -1,22 +1,34 @@
 ﻿namespace CmdPalVsCode;
 
 /// <summary>
+/// Enum for type of Visual Studio Code.
+/// </summary>
+enum VSCodeWorkspaceType
+{
+    Workspace,
+    Folder
+}
+
+
+/// <summary>
 /// Represents a Visual Studio Code workspace.
 /// </summary>
 internal class VSCodeWorkspace
 {
     public VSCodeInstance Instance;
     public string Path;
+    public VSCodeWorkspaceType VSCodeWorkspaceType;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VSCodeWorkspace"/> class.
     /// </summary>
     /// <param name="instance">The VS Code instance associated with the workspace.</param>
     /// <param name="path">The path to the workspace.</param>
-    public VSCodeWorkspace(VSCodeInstance instance, string path)
+    public VSCodeWorkspace(VSCodeInstance instance, string path, VSCodeWorkspaceType vsCodeWorkspaceType)
     {
         this.Path = path;
         this.Instance = instance;
+        this.VSCodeWorkspaceType = vsCodeWorkspaceType;
     }
 
     /// <summary>
@@ -36,14 +48,18 @@ internal class VSCodeWorkspace
 
         workspaceName = nameParts[nameParts.Length - 1];
 
-        // remove .code-workspace
-        workspaceName = workspaceName.Replace(".code-workspace", "");
-
-        if (workspaceName == "workspace" && nameParts.Length >= 2)
+        if (VSCodeWorkspaceType == VSCodeWorkspaceType.Workspace)
         {
-            // use folder name instead
-            workspaceName = nameParts[nameParts.Length - 2];
+            // remove .code-workspace
+            workspaceName = workspaceName.Replace(".code-workspace", "");
+
+            // if the workspace name is "workspace", use the folder name instead
+            if (workspaceName == "workspace" && nameParts.Length >= 2)
+            {
+                workspaceName = nameParts[nameParts.Length - 2];
+            }
         }
+
         return workspaceName;
     }
 
@@ -53,16 +69,32 @@ internal class VSCodeWorkspace
     /// <returns>The type of the workspace as a string.</returns>
     public string GetVSType()
     {
-        string tag = "Local";
         if (Path.StartsWith("vscode-remote://wsl", System.StringComparison.OrdinalIgnoreCase))
         {
-            tag = "WSL";
+            return "WSL";
         }
         else if (Path.StartsWith("vscode-remote://", System.StringComparison.OrdinalIgnoreCase))
         {
-            tag = "Remote";
+            return "Remote";
         }
 
-        return tag;
+        return "";
+    }
+
+    /// <summary>
+    /// Gets the workspace type (e.g., Workspace, Folder).
+    /// </summary>
+    /// <returns>The type of the workspace as a string.</returns>
+    public string GetWorkspaceType()
+    {
+        switch (VSCodeWorkspaceType)
+        {
+            case VSCodeWorkspaceType.Workspace:
+                return "Workspace";
+            case VSCodeWorkspaceType.Folder:
+                return "Folder";
+            default:
+                return "Unknown Type";
+        }
     }
 }

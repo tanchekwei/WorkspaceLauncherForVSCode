@@ -26,6 +26,12 @@ internal sealed partial class VSCodePage : ListPage
             // add instance to the list
             var command = new OpenVSCodeCommand(workspace.Instance.ExecutablePath, workspace.Path);
 
+            var typeTags = new List<Tag>() { new Tag(workspace.GetWorkspaceType()) };
+            if (workspace.GetVSType() != "")
+            {
+                typeTags.Add(new Tag(workspace.GetVSType()));
+            }
+
             Details details = new Details()
             {
                 Title = workspace.GetName(),
@@ -33,8 +39,13 @@ internal sealed partial class VSCodePage : ListPage
                 Metadata = new List<DetailsElement>(){
                     new DetailsElement()
                     {
+                        Key = "Target",
+                        Data = new DetailsTags() { Tags = new List<Tag>() { new Tag(workspace.Instance.Name) }.ToArray() }
+                    },
+                    new DetailsElement()
+                    {
                         Key = "Type",
-                        Data = new DetailsTags() { Tags = new List<Tag>() { new Tag(workspace.GetVSType()) }.ToArray() }
+                        Data = new DetailsTags() { Tags = typeTags.ToArray() }
                     },
                     new DetailsElement()
                     {

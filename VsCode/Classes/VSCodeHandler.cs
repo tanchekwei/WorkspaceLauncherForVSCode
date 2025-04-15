@@ -66,12 +66,12 @@ internal static class VSCodeHandler
                 var jsonContent = File.ReadAllText(instance.StoragePath);
                 var jsonDocument = JsonDocument.Parse(jsonContent);
                 var rootElement = jsonDocument.RootElement;
-                // Navigate to the profileAssociations.workspaces property
-                if (rootElement.TryGetProperty("backupWorkspaces", out var profileAssociations))
+
+                if (rootElement.TryGetProperty("backupWorkspaces", out var
+                    backupWorkspaces))
                 {
-                    if (profileAssociations.TryGetProperty("workspaces", out var workspaces))
+                    if (backupWorkspaces.TryGetProperty("workspaces", out var workspaces))
                     {
-                        // workspaces: key-value pairs
                         foreach (var workspace in workspaces.EnumerateArray())
                         {
                             if (workspace.TryGetProperty("configURIPath", out var path))
@@ -83,7 +83,25 @@ internal static class VSCodeHandler
                                     continue;
                                 }
 
-                                outWorkspaces.Add(new VSCodeWorkspace(instance, pathString));
+                                outWorkspaces.Add(new VSCodeWorkspace(instance, pathString, VSCodeWorkspaceType.Workspace));
+                            }
+                        }
+                    }
+
+                    if (backupWorkspaces.TryGetProperty("folders", out var folders))
+                    {
+                        foreach (var folder in folders.EnumerateArray())
+                        {
+                            if (folder.TryGetProperty("folderUri", out var path))
+                            {
+                                var pathString = path.GetString();
+
+                                if (pathString == null || pathString.Split('/').Length == 0)
+                                {
+                                    continue;
+                                }
+
+                                outWorkspaces.Add(new VSCodeWorkspace(instance, pathString, VSCodeWorkspaceType.Folder));
                             }
                         }
                     }

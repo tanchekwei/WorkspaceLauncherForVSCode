@@ -4,6 +4,8 @@
 
 This project provides a command palette extension for opening Visual Studio Code workspaces.
 
+![Command Palette for Visual Studio Code](./Assets/screenshot.png)
+
 ## Features
 
 - **Workspace Management**: Retrieve and display a list of available workspaces, including their paths and types (e.g., Local, WSL, Remote).

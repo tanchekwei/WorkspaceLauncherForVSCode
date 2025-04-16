@@ -28,8 +28,18 @@ internal sealed partial class OpenVSCodeCommand : InvokableCommand
     /// <returns>The result of the command execution.</returns>
     public override CommandResult Invoke()
     {
+        string? arguments;
         // Open the workspace in VS Code
-        ShellHelpers.OpenInShell(executablePath, $"--file-uri {workspacePath}", null, ShellHelpers.ShellRunAsType.None, false);
+        if (workspacePath.EndsWith(".code-workspace", System.StringComparison.OrdinalIgnoreCase))
+        {
+            arguments = $"--file-uri \"{workspacePath}\"";
+        }
+        else
+        {
+            arguments = $"--folder-uri \"{workspacePath}\"";
+        }
+
+        ShellHelpers.OpenInShell(executablePath, arguments, null, ShellHelpers.ShellRunAsType.None, false);
 
         return CommandResult.Hide();
     }

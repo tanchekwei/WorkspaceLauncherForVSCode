@@ -16,12 +16,12 @@ This project provides a command palette extension for opening Visual Studio Code
 
 ### Windows Store
 
-The Application is currently in the process of being published to the Windows Store. Once it is available, you can install it directly from there.
+[![Install from Microsoft Store](./Assets/ms-store-badge.png)](https://apps.microsoft.com/detail/9PKCGVQ05TG1)
 
 ### Manual Installation
 
 1. Make sure you use the latest version of PowerToys.
-2. Download the current Version and the certificate from Releases.
+2. Download the current Version and the certificate from [releases](https://github.com/JonahFintzDev/CommandPaletteVSCode/releases/).
 3. Install the certificate:
    - When prompted, select `Local Machine` as the store location.
    - Place the certificate in the `Trusted People` store.

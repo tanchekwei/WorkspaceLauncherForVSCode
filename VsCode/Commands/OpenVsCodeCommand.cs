@@ -31,7 +31,6 @@ internal sealed partial class OpenVSCodeCommand : InvokableCommand
         // Open the workspace in VS Code
         ShellHelpers.OpenInShell(executablePath, $"--file-uri {workspacePath}", null, ShellHelpers.ShellRunAsType.None, false);
 
-        ClipboardHelper.SetText(workspacePath);
         return CommandResult.Hide();
     }
 }

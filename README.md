@@ -24,10 +24,7 @@ This project provides a command palette extension for opening Visual Studio Code
 
 1. Make sure you use the latest version of PowerToys.
 2. Download the current Version and the certificate from [releases](https://github.com/JonahFintzDev/CommandPaletteVSCode/releases/).
-3. Install the certificate:
-   - When prompted, select `Local Machine` as the store location.
-   - Place the certificate in the `Trusted People` store.
-4. Install the application by double-clicking the `.msix` file.
+3. Install the application by double-clicking the `.msix` file.
 
 ## Contributing
 

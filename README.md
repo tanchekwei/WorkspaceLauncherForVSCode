@@ -16,7 +16,9 @@ This project provides a command palette extension for opening Visual Studio Code
 
 ### Windows Store
 
-The Application is currently in the process of being published to the Windows Store. Once it is available, you can install it directly from there.
+<a href="https://apps.microsoft.com/detail/9PKCGVQ05TG1?mode=direct">
+	<img src="https://get.microsoft.com/images/en-us%20light.svg" width="300"/>
+</a>
 
 ### Manual Installation
 

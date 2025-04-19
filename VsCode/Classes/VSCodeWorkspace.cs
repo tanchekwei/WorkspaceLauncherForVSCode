@@ -1,4 +1,9 @@
-﻿namespace CmdPalVsCode;
+﻿using CmdPalVsCode.Properties;
+using Microsoft.CommandPalette.Extensions.Toolkit;
+using System;
+using System.Collections.Generic;
+
+namespace CmdPalVsCode;
 
 /// <summary>
 /// Enum for type of Visual Studio Code.
@@ -96,5 +101,37 @@ internal class VSCodeWorkspace
             default:
                 return "Unknown Type";
         }
+    }
+
+
+    /// <summary>
+    /// Gets the details of the workspace.
+    /// </summary>
+    /// <returns>An array of details elements containing information about the workspace.</returns>
+    public DetailsElement[] GetMetadata()
+    {
+        var typeTags = new List<Tag>() { new Tag(GetWorkspaceType()) };
+        if (GetVSType() != "")
+        {
+            typeTags.Add(new Tag(GetVSType()));
+        }
+
+        return new List<DetailsElement>(){
+            new DetailsElement()
+            {
+                Key = Resource.item_details_target,
+                Data = new DetailsTags() { Tags = new List<Tag>() { new Tag(Instance.Name) }.ToArray() }
+            },
+            new DetailsElement()
+            {
+                Key = Resource.item_details_type,
+                Data = new DetailsTags() { Tags = typeTags.ToArray() }
+            },
+            new DetailsElement()
+            {
+                Key = Resource.item_details_path,
+                Data = new DetailsLink() { Text = Uri.UnescapeDataString(Path) },
+            }
+        }.ToArray();
     }
 }

@@ -26,6 +26,13 @@ This project provides a command palette extension for opening Visual Studio Code
 2. Download the current Version and the certificate from [releases](https://github.com/JonahFintzDev/CommandPaletteVSCode/releases/).
 3. Install the application by double-clicking the `.msix` file.
 
+## Settings
+
+- **Preferred Edition**: Determines which edition (Default or Insider) is used when a folder or workspace has been opened in both editions of VS Code.
+- **Use Strict Search**: Enables or disables strict search for workspaces.  
+  - **Strict Search**: Matches items where the search text appears as a contiguous substring in the item's title or subtitle. For example, searching for "abc" will match "abc" or "abc123" but not "a1b2c3".
+- **Show Details Panel**: Toggles the visibility of the details panel in the UI.
+
 ## Contributing
 
 Contributions are welcome! If you have suggestions for improvements or new features, please open an issue or submit a pull request.

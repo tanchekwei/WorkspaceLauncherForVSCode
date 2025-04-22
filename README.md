@@ -14,17 +14,30 @@ This project provides a command palette extension for opening Visual Studio Code
 
 ## Installation
 
+> [!NOTE]  
+> Because the application is first signed by the Microsoft Store, updates will take a few days to be available via WinGet or in the Command Palette.
+
 ### Windows Store
 
 <a href="https://apps.microsoft.com/detail/9PKCGVQ05TG1?mode=direct">
 	<img src="https://get.microsoft.com/images/en-us%20light.svg" width="300"/>
 </a>
 
+### Via Command Palette
+1. Open Command Palette
+2. Select "Command Palette - VS Code"
+
+### Via Winget
+1. Open Command Prompt or PowerShell
+2. Run the following command:
+   ```bash
+   winget install JonahFintzDEV.CommandPalette-VSCode
+   ```
+
 ### Manual Installation
 
 1. Make sure you use the latest version of PowerToys.
-2. Download the current Version and the certificate from [releases](https://github.com/JonahFintzDev/CommandPaletteVSCode/releases/).
-3. Install the application by double-clicking the `.msix` file.
+2. Install the application by double-clicking the `.msix` file.
 
 ## Settings
 

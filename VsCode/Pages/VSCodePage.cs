@@ -65,7 +65,7 @@ internal sealed partial class VSCodePage : DynamicListPage
         }
         else
         {
-            // string search contains chracters in order of search value, with optinal random characters between    
+            // string search contains characters in order of search value, with optional random characters between    
             // e.g. "abc" matches "a1b2c3", "ab", "a b c", etc.
             items = items.FindAll(item =>
             {

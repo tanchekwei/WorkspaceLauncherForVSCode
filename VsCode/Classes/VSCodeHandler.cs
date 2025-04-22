@@ -15,19 +15,27 @@ internal static class VSCodeHandler
 
     /// <summary>
     /// Loads all available VS Code instances (default and insiders, user and system installations).
-    /// </summary>
-    public static void LoadInstances()
+    /// </summary> 
+    public static void LoadInstances(string preferredEdition)
     {
         var appdataProgramFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var programsFolderPathBase = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
         var defaultStoragePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Code", "User", "globalStorage");
         var insiderStoragePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Code - Insiders", "User", "globalStorage");
 
+        Instances.Clear();
 
         AddInstance("VS Code", Path.Combine(appdataProgramFilesPath, "Programs", "Microsoft VS Code", "Code.exe"), defaultStoragePath, VSCodeInstallationType.User, VSCodeType.Default);
         AddInstance("VS Code [System]", Path.Combine(programsFolderPathBase, "Microsoft VS Code", "Code.exe"), defaultStoragePath, VSCodeInstallationType.System, VSCodeType.Default);
         AddInstance("VS Code - Insiders", Path.Combine(appdataProgramFilesPath, "Programs", "Microsoft VS Code Insiders", "Code - Insiders.exe"), insiderStoragePath, VSCodeInstallationType.User, VSCodeType.Insider);
         AddInstance("VS Code - Insiders [System]", Path.Combine(programsFolderPathBase, "Microsoft VS Code Insiders", "Code - Insiders.exe"), insiderStoragePath, VSCodeInstallationType.System, VSCodeType.Insider);
+
+
+        if (preferredEdition == "Insider")
+        {
+            // Reverse the order of the instances
+            Instances.Reverse();
+        }
     }
 
     /// <summary>

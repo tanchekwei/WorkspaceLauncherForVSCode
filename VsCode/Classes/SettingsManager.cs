@@ -15,35 +15,53 @@ public class SettingsManager : JsonSettingsManager
 
     private static string Namespaced(string propertyName) => $"{_namespace}.{propertyName}";
 
-    private static readonly List<ChoiceSetSetting.Choice> _choices =
+    private static readonly List<ChoiceSetSetting.Choice> _preferredEditionChoices =
     [
         new ChoiceSetSetting.Choice(Resource.setting_preferredEdition_option_default_label, "Default"),
         new ChoiceSetSetting.Choice(Resource.setting_preferredEdition_option_insider_label, "Insider"),
     ];
+
+    private static readonly List<ChoiceSetSetting.Choice> _tagChoices =
+    [
+        new ChoiceSetSetting.Choice(Resource.setting_tagType_option_none_label, "None"),
+        new ChoiceSetSetting.Choice(Resource.setting_tagType_option_type_label, "Type"),
+        new ChoiceSetSetting.Choice(Resource.setting_tagType_option_target_label, "Target"),
+        new ChoiceSetSetting.Choice(Resource.setting_tagType_option_typeandtarget_label, "TypeAndTarget"),
+    ];
+
 
 
     private readonly ToggleSetting _useStrictSearch = new(
         Namespaced(nameof(UseStrichtSearch)),
         Resource.settings_useStrictSearch_label,
         Resource.settings_useStrictSearch_desc,
-        false); // TODO -- double check default value
+        false);
 
     private readonly ToggleSetting _showDetails = new(
        Namespaced(nameof(ShowDetails)),
        Resource.settings_showDetails_label,
        Resource.settings_showDetails_desc,
-       false); // TODO -- double check default value
+       false);
 
     private readonly ChoiceSetSetting _preferredEdition = new(
         Namespaced(nameof(PreferredEdition)),
         Resource.setting_preferredEdition_label,
         Resource.setting_preferredEdition_desc,
-        _choices);
+        _preferredEditionChoices);
+
+
+
+    private readonly ChoiceSetSetting _tagType = new(
+        Namespaced(nameof(TagType)),
+        Resource.setting_tagType_label,
+        Resource.setting_tagType_desc,
+        _tagChoices);
 
     public bool UseStrichtSearch => _useStrictSearch.Value;
     public bool ShowDetails => _showDetails.Value;
 
     public string PreferredEdition => _preferredEdition.Value ?? "Default";
+    public string TagType => _tagType.Value ?? "Type";
 
 
     internal static string SettingsJsonPath()
@@ -61,6 +79,7 @@ public class SettingsManager : JsonSettingsManager
 
         Settings.Add(_showDetails);
         Settings.Add(_useStrictSearch);
+        Settings.Add(_tagType);
         Settings.Add(_preferredEdition);
 
         // Load settings from file upon initialization

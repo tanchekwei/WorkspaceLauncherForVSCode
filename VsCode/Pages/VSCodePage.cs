@@ -47,7 +47,40 @@ internal sealed partial class VSCodePage : DynamicListPage
                 Metadata = workspace.GetMetadata(),
             };
 
-            items.Add(new ListItem(command) { Title = details.Title, Subtitle = Uri.UnescapeDataString(workspace.Path), Details = details, Icon = workspace.Instance.GetIcon() });
+            var tags = new List<Tag>();
+
+            switch (_settingsManager.TagType)
+            {
+                case "None":
+                    break;
+                case "Type":
+                    tags.Add(new Tag(workspace.GetWorkspaceType()));
+                    if (workspace.GetVSType() != "")
+                    {
+                        tags.Add(new Tag(workspace.GetVSType()));
+                    }
+                    break;
+                case "Target":
+                    tags.Add(new Tag(workspace.Instance.Name));
+                    break;
+                case "TypeAndTarget":
+                    tags.Add(new Tag(workspace.GetWorkspaceType()));
+                    if (workspace.GetVSType() != "")
+                    {
+                        tags.Add(new Tag(workspace.GetVSType()));
+                    }
+                    tags.Add(new Tag(workspace.Instance.Name));
+                    break;
+            }
+
+            items.Add(new ListItem(command)
+            {
+                Title = details.Title,
+                Subtitle = Uri.UnescapeDataString(workspace.Path),
+                Details = details,
+                Icon = workspace.Instance.GetIcon(),
+                Tags = tags.ToArray()
+            });
         }
 
         if (items.Count == 0)

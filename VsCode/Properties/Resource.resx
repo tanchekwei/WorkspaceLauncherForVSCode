@@ -162,4 +162,22 @@
   <data name="settings_showDetails_desc" xml:space="preserve">
     <value>Details panel</value>
   </data>
+  <data name="setting_tagType_label" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="setting_tagType_desc" xml:space="preserve">
+    <value>Displayed tags</value>
+  </data>
+  <data name="setting_tagType_option_none_label" xml:space="preserve">
+    <value>-</value>
+  </data>
+  <data name="setting_tagType_option_type_label" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="setting_tagType_option_target_label" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="setting_tagType_option_typeandtarget_label" xml:space="preserve">
+    <value>Type &amp; Target</value>
+  </data>
 </root>

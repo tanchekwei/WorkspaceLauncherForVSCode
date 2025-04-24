@@ -160,6 +160,60 @@ namespace CmdPalVsCode.Properties {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Displayed tags ähnelt.
+        /// </summary>
+        internal static string setting_tagType_desc {
+            get {
+                return ResourceManager.GetString("setting_tagType_desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Tags ähnelt.
+        /// </summary>
+        internal static string setting_tagType_label {
+            get {
+                return ResourceManager.GetString("setting_tagType_label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die - ähnelt.
+        /// </summary>
+        internal static string setting_tagType_option_none_label {
+            get {
+                return ResourceManager.GetString("setting_tagType_option_none_label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Target ähnelt.
+        /// </summary>
+        internal static string setting_tagType_option_target_label {
+            get {
+                return ResourceManager.GetString("setting_tagType_option_target_label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Type ähnelt.
+        /// </summary>
+        internal static string setting_tagType_option_type_label {
+            get {
+                return ResourceManager.GetString("setting_tagType_option_type_label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Type &amp; Target ähnelt.
+        /// </summary>
+        internal static string setting_tagType_option_typeandtarget_label {
+            get {
+                return ResourceManager.GetString("setting_tagType_option_typeandtarget_label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Details panel ähnelt.
         /// </summary>
         internal static string settings_showDetails_desc {

@@ -45,6 +45,12 @@ This project provides a command palette extension for opening Visual Studio Code
 - **Use Strict Search**: Enables or disables strict search for workspaces.  
   - **Strict Search**: Matches items where the search text appears as a contiguous substring in the item's title or subtitle. For example, searching for "abc" will match "abc" or "abc123" but not "a1b2c3".
 - **Show Details Panel**: Toggles the visibility of the details panel in the UI.
+- **Tag Type**: Configures the tags displayed for each workspace.  
+  - Options:  
+    - **None**: No tags are displayed.  
+    - **Type**: Displays the workspace type (e.g., Local, WSL, Remote).  
+    - **Target**: Displays the target instance name (e.g., VS Code, VS Code Insider).  
+    - **Type & Target**: Displays both the workspace type and the target instance name.
 
 ## Contributing
 

@@ -10,16 +10,18 @@ internal sealed partial class OpenVSCodeCommand : InvokableCommand
     public override string Name => "Open VS Code";
     private string workspacePath;
     private string executablePath;
+    private VSCodePage page;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenVSCodeCommand"/> class.
     /// </summary>
     /// <param name="executablePath">The path to the VS Code executable.</param>
     /// <param name="workspacePath">The path to the workspace to open.</param>
-    public OpenVSCodeCommand(string executablePath, string workspacePath)
+    public OpenVSCodeCommand(string executablePath, string workspacePath, VSCodePage page)
     {
         this.workspacePath = workspacePath;
         this.executablePath = executablePath;
+        this.page = page;
     }
 
     /// <summary>
@@ -40,6 +42,9 @@ internal sealed partial class OpenVSCodeCommand : InvokableCommand
         }
 
         ShellHelpers.OpenInShell(executablePath, arguments, null, ShellHelpers.ShellRunAsType.None, false);
+
+        // reset search text
+        page.UpdateSearchText(page.SearchText, string.Empty);
 
         return CommandResult.Hide();
     }

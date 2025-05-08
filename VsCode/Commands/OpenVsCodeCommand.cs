@@ -44,7 +44,8 @@ internal sealed partial class OpenVSCodeCommand : InvokableCommand
         ShellHelpers.OpenInShell(executablePath, arguments, null, ShellHelpers.ShellRunAsType.None, false);
 
         // reset search text
-        page.UpdateSearchText(page.SearchText, string.Empty);
+        page.UpdateSearchText(page.SearchText, "");
+        page.SearchText = "";
 
         return CommandResult.Hide();
     }

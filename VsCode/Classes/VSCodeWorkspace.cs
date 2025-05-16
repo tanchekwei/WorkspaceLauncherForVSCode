@@ -45,7 +45,7 @@ internal class VSCodeWorkspace
         string workspaceName = "";
 
         // split name by / and get last part
-        var nameParts = Path.Split('/');
+        var nameParts = Uri.UnescapeDataString(Path).Split('/');
         if (nameParts.Length == 0)
         {
             return workspaceName;

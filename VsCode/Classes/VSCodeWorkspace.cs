@@ -2,7 +2,6 @@
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using System;
 using System.Collections.Generic;
-using Windows.Web.AtomPub;
 
 namespace CmdPalVsCode;
 

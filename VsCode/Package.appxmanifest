@@ -13,7 +13,6 @@
 	  Name="JonahFintzDEV.602808C55E867"
 	  Publisher="CN=240FD63B-E96D-4F79-A6D2-BFC6E6AD6C10"
 	  Version="1.4.2.0" />
-
 	
 	<Properties>
     <DisplayName>Command Palette - VS Code</DisplayName>

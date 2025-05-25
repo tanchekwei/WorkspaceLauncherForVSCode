@@ -90,7 +90,7 @@ internal sealed partial class VSCodePage : DynamicListPage
         LoadItems = false;
 
         // set LoadItems to true in 10s
-        System.Threading.Tasks.Task.Delay(10000).ContinueWith(_ => LoadItems = true);
+        System.Threading.Tasks.Task.Delay(10000).ContinueWith(_ => Interlocked.Exchange(ref LoadItems, true));
     }
 
     public override IListItem[] GetItems()

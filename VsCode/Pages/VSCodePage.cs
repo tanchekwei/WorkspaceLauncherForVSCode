@@ -10,6 +10,9 @@ namespace CmdPalVsCode;
 internal sealed partial class VSCodePage : DynamicListPage
 {
     private readonly SettingsManager _settingsManager;
+    private List<ListItem> _allItems = new List<ListItem>();
+    public static bool LoadItems = true;
+
 
     public VSCodePage(SettingsManager settingsManager)
     {
@@ -25,26 +28,27 @@ internal sealed partial class VSCodePage : DynamicListPage
         };
     }
 
+
     public override void UpdateSearchText(string oldSearch, string newSearch)
     {
         RaiseItemsChanged();
     }
 
-    public override IListItem[] GetItems()
+    public void InitializeItemList()
     {
-        var items = new List<ListItem>();
+        _allItems = new List<ListItem>();
+        var workspaces = VSCodeHandler.GetWorkspaces();
 
-        IsLoading = true;
-        foreach (var workspace in VSCodeHandler.GetWorkspaces())
+        foreach (var workspace in workspaces)
         {
             // add instance to the list
             var command = new OpenVSCodeCommand(workspace.Instance.ExecutablePath, workspace.Path, this);
 
             Details details = new Details()
             {
-                Title = workspace.GetName(),
-                HeroImage = workspace.Instance.GetIcon(),
-                Metadata = workspace.GetMetadata(),
+                Title = workspace.WorkspaceName,
+                HeroImage = workspace.Instance.Icon,
+                Metadata = workspace.Details,
             };
 
             var tags = new List<Tag>();
@@ -54,56 +58,66 @@ internal sealed partial class VSCodePage : DynamicListPage
                 case "None":
                     break;
                 case "Type":
-                    tags.Add(new Tag(workspace.GetWorkspaceType()));
-                    if (workspace.GetVSType() != "")
+                    tags.Add(new Tag(workspace.WorkspaceTypeString));
+                    if (workspace.VSTypeString != "")
                     {
-                        tags.Add(new Tag(workspace.GetVSType()));
+                        tags.Add(new Tag(workspace.VSTypeString));
                     }
                     break;
                 case "Target":
                     tags.Add(new Tag(workspace.Instance.Name));
                     break;
                 case "TypeAndTarget":
-                    tags.Add(new Tag(workspace.GetWorkspaceType()));
-                    if (workspace.GetVSType() != "")
+                    tags.Add(new Tag(workspace.WorkspaceTypeString));
+                    if (workspace.VSTypeString != "")
                     {
-                        tags.Add(new Tag(workspace.GetVSType()));
+                        tags.Add(new Tag(workspace.VSTypeString));
                     }
                     tags.Add(new Tag(workspace.Instance.Name));
                     break;
             }
 
-            items.Add(new ListItem(command)
+            _allItems.Add(new ListItem(command)
             {
                 Title = details.Title,
                 Subtitle = Uri.UnescapeDataString(workspace.Path),
                 Details = details,
-                Icon = workspace.Instance.GetIcon(),
+                Icon = workspace.Instance.Icon,
                 Tags = tags.ToArray()
             });
         }
 
-        if (items.Count == 0)
+        LoadItems = false;
+
+        // set LoadItems to true in 10s
+        System.Threading.Tasks.Task.Delay(10000).ContinueWith(_ => LoadItems = true);
+    }
+
+    public override IListItem[] GetItems()
+    {
+        IsLoading = true;
+        var items = new List<ListItem>();
+        var lowerSearchString = SearchText.ToLower(CultureInfo.CurrentUICulture);
+
+        if (LoadItems == true)
         {
-            return [
-                new ListItem(new NoOpCommand()) { Title = Resource.no_items_found, Subtitle = Resource.no_items_found_subtitle, Icon = IconHelpers.FromRelativePath("Assets\\VsCodeIcon.png") }
-            ];
+            InitializeItemList();
         }
 
         // filter items based on search text
         if (_settingsManager.UseStrichtSearch)
         {
             // strict search contains all characters in order of search value, with no random characters between
-            items = items.FindAll(x => x.Subtitle.ToLower(CultureInfo.CurrentUICulture).Contains(SearchText.ToLower(CultureInfo.CurrentUICulture), StringComparison.OrdinalIgnoreCase));
+            items = _allItems.FindAll(x => x.Subtitle.ToLower(CultureInfo.CurrentUICulture).Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase));
         }
         else
         {
             // string search contains characters in order of search value, with optional random characters between    
             // e.g. "abc" matches "a1b2c3", "ab", "a b c", etc.
-            items = items.FindAll(item =>
+            items = _allItems.FindAll(item =>
             {
                 int charIndex = 0;
-                foreach (var character in SearchText.ToLower(CultureInfo.CurrentUICulture))
+                foreach (var character in lowerSearchString)
                 {
                     charIndex = item.Title.ToLower(CultureInfo.CurrentUICulture).IndexOf(character, charIndex);
                     if (charIndex == -1)
@@ -120,10 +134,36 @@ internal sealed partial class VSCodePage : DynamicListPage
             });
         }
 
-        // add debug item
-        // items.Insert(0, new ListItem(new NoOpCommand()) { Title = ShowDetails.ToString() });
+        if (items.Count == 0)
+        {
+            IsLoading = false;
+            return [
+                new ListItem(new NoOpCommand()) {
+                    Title = Resource.no_items_found,
+                    Subtitle = Resource.no_items_found_subtitle,
+                    Icon = IconHelpers.FromRelativePath("Assets\\VsCodeIcon.png")
+                }
+            ];
+        }
 
         IsLoading = false;
+        // Debug
+
+        /* 
+        var debugItem = new ListItem(new NoOpCommand())
+        {
+            Title = "Debug",
+            Details = new Details()
+            {
+                Title = "Debug Information",
+                Metadata = [
+                new DetailsElement() { Key = "Timestamp", Data = new DetailsTags() { Tags = [new Tag(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture))] } },
+                new DetailsElement() { Key = "Timestamp", Data = new DetailsTags() { Tags = [new Tag(Debug)] } },
+                ]
+            },
+        };
+        items.Insert(0, debugItem);
+        */
 
         return items.ToArray();
     }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text.Json;
 
@@ -30,11 +31,79 @@ internal static class VSCodeHandler
         AddInstance("VS Code - Insiders", Path.Combine(appdataProgramFilesPath, "Programs", "Microsoft VS Code Insiders", "Code - Insiders.exe"), insiderStoragePath, VSCodeInstallationType.User, VSCodeType.Insider);
         AddInstance("VS Code - Insiders [System]", Path.Combine(programsFolderPathBase, "Microsoft VS Code Insiders", "Code - Insiders.exe"), insiderStoragePath, VSCodeInstallationType.System, VSCodeType.Insider);
 
+        // search for custom installations in PATH environment variable
+        try
+        {
+            var pathEnv = Environment.GetEnvironmentVariable("PATH");
+            if (!string.IsNullOrEmpty(pathEnv))
+            {
+                var paths = pathEnv.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var dir in paths)
+                {
+
+                    // get parent directory of the current directory
+                    if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir))
+                    {
+                        continue;
+                    }
+                    var parentDir = Path.GetDirectoryName(dir) ?? dir;
+                    try
+                    {
+                        var codeExe = Path.Combine(parentDir, "code.exe");
+                        var codeInsidersExe = Path.Combine(parentDir, "Code - Insiders.exe");
+
+                        if (File.Exists(codeExe))
+                        {
+                            AddInstance("VS Code [Custom]", codeExe, defaultStoragePath, VSCodeInstallationType.User, VSCodeType.Default);
+                        }
+                        if (File.Exists(codeInsidersExe))
+                        {
+                            AddInstance("VS Code - Insiders [Custom]", codeInsidersExe, insiderStoragePath, VSCodeInstallationType.User, VSCodeType.Insider);
+                        }
+                    }
+                    catch
+                    {
+                        // ignore any errors while checking for custom installations
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // ignore invalid PATH entries
+        }
 
         if (preferredEdition == "Insider")
         {
-            // Reverse the order of the instances
-            Instances.Reverse();
+            // sort instances to have insiders first
+            Instances.Sort((x, y) =>
+            {
+                if (x.VSCodeType == VSCodeType.Insider && y.VSCodeType != VSCodeType.Insider)
+                {
+                    return -1;
+                }
+                else if (x.VSCodeType != VSCodeType.Insider && y.VSCodeType == VSCodeType.Insider)
+                {
+                    return 1;
+                }
+                return 0;
+            });
+        }
+        else
+        {
+            // sort instances to have default first
+            Instances.Sort((x, y) =>
+            {
+                if (x.VSCodeType == VSCodeType.Default && y.VSCodeType != VSCodeType.Default)
+                {
+                    return -1;
+                }
+                else if (x.VSCodeType != VSCodeType.Default && y.VSCodeType == VSCodeType.Default)
+                {
+                    return 1;
+                }
+                return 0;
+            });
         }
     }
 
@@ -50,6 +119,11 @@ internal static class VSCodeHandler
     {
         if (File.Exists(path))
         {
+            // check if there is already an instance with the same executable path
+            if (Instances.Exists(instance => instance.ExecutablePath.Equals(path, StringComparison.OrdinalIgnoreCase)))
+            {
+                return; // Instance already exists
+            }
             Instances.Add(new VSCodeInstance(name, path, storagePath, type, codeType));
         }
     }

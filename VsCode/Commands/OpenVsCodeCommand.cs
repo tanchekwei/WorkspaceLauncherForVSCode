@@ -47,6 +47,8 @@ internal sealed partial class OpenVSCodeCommand : InvokableCommand
         page.UpdateSearchText(page.SearchText, "");
         page.SearchText = "";
 
-        return CommandResult.Hide();
+        VSCodePage.LoadItems = true;
+
+        return CommandResult.GoHome();
     }
 }

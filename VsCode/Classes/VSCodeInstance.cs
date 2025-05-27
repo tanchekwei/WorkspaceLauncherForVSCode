@@ -31,6 +31,7 @@ internal class VSCodeInstance
     public string StoragePath;
     public VSCodeInstallationType InstallationType;
     public VSCodeType VSCodeType;
+    public IconInfo Icon;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VSCodeInstance"/> class.
@@ -47,13 +48,15 @@ internal class VSCodeInstance
         this.StoragePath = storagePath;
         this.InstallationType = installationType;
         this.VSCodeType = type;
+        this.Icon = GetIcon();
+
     }
 
     /// <summary>
     /// Gets the icon associated with the VS Code instance.
     /// </summary>
     /// <returns>An icon representing the VS Code instance.</returns>
-    public IIconInfo GetIcon()
+    private IconInfo GetIcon()
     {
         switch (VSCodeType)
         {

@@ -195,7 +195,7 @@
     <AppxBundlePlatforms>x86|x64|arm64</AppxBundlePlatforms>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>
-    <AppxPackageDir>I:\Freelancer\RiderProjects\CommandPaletteVSCode\AppPackages\</AppxPackageDir>
+    <AppxPackageDir>G:\.net\CommandPaletteVSCode\AppPackages\</AppxPackageDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

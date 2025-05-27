@@ -23,6 +23,10 @@ internal class VSCodeWorkspace
     public VSCodeInstance Instance;
     public string Path;
     public VSCodeWorkspaceType VSCodeWorkspaceType;
+    public string WorkspaceName = "";
+    public string VSTypeString = "";
+    public string WorkspaceTypeString = "";
+    public DetailsElement[] Details = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VSCodeWorkspace"/> class.
@@ -34,72 +38,76 @@ internal class VSCodeWorkspace
         this.Path = path;
         this.Instance = instance;
         this.VSCodeWorkspaceType = vsCodeWorkspaceType;
+
+        SetName();
+        SetVSType();
+        SetWorkspaceType();
+        SetMetadata();
     }
 
     /// <summary>
-    /// Gets the name of the workspace.
+    /// Sets the name of the workspace.
     /// </summary>
     /// <returns>The name of the workspace.</returns>
-    public string GetName()
+    public void SetName()
     {
-        string workspaceName = "";
+        WorkspaceName = "";
 
         // split name by / and get last part
         var nameParts = Uri.UnescapeDataString(Path).Split('/');
         if (nameParts.Length == 0)
         {
-            return workspaceName;
+            return;
         }
 
-        workspaceName = nameParts[nameParts.Length - 1];
+        WorkspaceName = nameParts[nameParts.Length - 1];
 
         if (VSCodeWorkspaceType == VSCodeWorkspaceType.Workspace)
         {
             // remove .code-workspace
-            workspaceName = workspaceName.Replace(".code-workspace", "");
+            WorkspaceName = WorkspaceName.Replace(".code-workspace", "");
 
             // if the workspace name is "workspace", use the folder name instead
-            if (workspaceName == "workspace" && nameParts.Length >= 2)
+            if (WorkspaceName == "workspace" && nameParts.Length >= 2)
             {
-                workspaceName = nameParts[nameParts.Length - 2];
+                WorkspaceName = nameParts[nameParts.Length - 2];
             }
         }
-
-        return workspaceName;
     }
 
     /// <summary>
     /// Determines the type of the workspace (e.g., Local, WSL, Remote).
     /// </summary>
     /// <returns>The type of the workspace as a string.</returns>
-    public string GetVSType()
+    public void SetVSType()
     {
         if (Path.StartsWith("vscode-remote://wsl", System.StringComparison.OrdinalIgnoreCase))
         {
-            return "WSL";
+            VSTypeString = "WSL";
         }
         else if (Path.StartsWith("vscode-remote://", System.StringComparison.OrdinalIgnoreCase))
         {
-            return "Remote";
+            VSTypeString = "Remote";
         }
-
-        return "";
     }
 
     /// <summary>
-    /// Gets the workspace type (e.g., Workspace, Folder).
+    /// Sets the workspace type (e.g., Workspace, Folder).
     /// </summary>
     /// <returns>The type of the workspace as a string.</returns>
-    public string GetWorkspaceType()
+    public void SetWorkspaceType()
     {
         switch (VSCodeWorkspaceType)
         {
             case VSCodeWorkspaceType.Workspace:
-                return "Workspace";
+                WorkspaceTypeString = "Workspace";
+                break;
             case VSCodeWorkspaceType.Folder:
-                return "Folder";
+                WorkspaceTypeString = "Folder";
+                break;
             default:
-                return "Unknown Type";
+                WorkspaceTypeString = "Unknown Type";
+                break;
         }
     }
 
@@ -108,15 +116,15 @@ internal class VSCodeWorkspace
     /// Gets the details of the workspace.
     /// </summary>
     /// <returns>An array of details elements containing information about the workspace.</returns>
-    public DetailsElement[] GetMetadata()
+    public void SetMetadata()
     {
-        var typeTags = new List<Tag>() { new Tag(GetWorkspaceType()) };
-        if (GetVSType() != "")
+        var typeTags = new List<Tag>() { new Tag(WorkspaceTypeString) };
+        if (VSTypeString != "")
         {
-            typeTags.Add(new Tag(GetVSType()));
+            typeTags.Add(new Tag(VSTypeString));
         }
 
-        return new List<DetailsElement>(){
+        Details = new List<DetailsElement>(){
             new DetailsElement()
             {
                 Key = Resource.item_details_target,

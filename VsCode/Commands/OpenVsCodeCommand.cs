@@ -11,17 +11,21 @@ internal sealed partial class OpenVSCodeCommand : InvokableCommand
     private string workspacePath;
     private string executablePath;
     private VSCodePage page;
+    private string commandResult;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenVSCodeCommand"/> class.
     /// </summary>
     /// <param name="executablePath">The path to the VS Code executable.</param>
     /// <param name="workspacePath">The path to the workspace to open.</param>
-    public OpenVSCodeCommand(string executablePath, string workspacePath, VSCodePage page)
+    /// <param name="page">The VS Code page instance.</param>
+    /// <param name="commandResult">The command result setting value.</param>
+    public OpenVSCodeCommand(string executablePath, string workspacePath, VSCodePage page, string commandResult)
     {
         this.workspacePath = workspacePath;
         this.executablePath = executablePath;
         this.page = page;
+        this.commandResult = commandResult;
     }
 
     /// <summary>
@@ -42,13 +46,20 @@ internal sealed partial class OpenVSCodeCommand : InvokableCommand
         }
 
         ShellHelpers.OpenInShell(executablePath, arguments, null, ShellHelpers.ShellRunAsType.None, false);
-
-        // reset search text
-        page.UpdateSearchText(page.SearchText, "");
-        page.SearchText = "";
-
         VSCodePage.LoadItems = true;
 
-        return CommandResult.GoHome();
+        switch (commandResult)
+        {
+            case "GoBack":
+                return CommandResult.GoBack();
+            case "KeepOpen":
+                // reset search text
+                page.UpdateSearchText(page.SearchText, "");
+                page.SearchText = "";
+                return CommandResult.KeepOpen();
+            case "Dismiss":
+            default:
+             return CommandResult.Dismiss();
+        }
     }
 }

@@ -29,6 +29,13 @@ public class SettingsManager : JsonSettingsManager
         new ChoiceSetSetting.Choice(Resource.setting_tagType_option_typeandtarget_label, "TypeAndTarget"),
     ];
 
+    private static readonly List<ChoiceSetSetting.Choice> _commandResultChoices =
+    [
+        new ChoiceSetSetting.Choice(Resource.setting_commandResult_option_dismiss_label, "Dismiss"),
+        new ChoiceSetSetting.Choice(Resource.setting_commandResult_option_goback_label, "GoBack"),
+        new ChoiceSetSetting.Choice(Resource.setting_commandResult_option_keepopen_label, "KeepOpen"),
+    ];
+
 
 
     private readonly ToggleSetting _useStrictSearch = new(
@@ -57,11 +64,18 @@ public class SettingsManager : JsonSettingsManager
         Resource.setting_tagType_desc,
         _tagChoices);
 
+    private readonly ChoiceSetSetting _commandResult = new(
+        Namespaced(nameof(CommandResult)),
+        Resource.setting_commandResult_label,
+        Resource.setting_commandResult_desc,
+        _commandResultChoices);
+
     public bool UseStrichtSearch => _useStrictSearch.Value;
     public bool ShowDetails => _showDetails.Value;
 
     public string PreferredEdition => _preferredEdition.Value ?? "Default";
     public string TagType => _tagType.Value ?? "Type";
+    public string CommandResult => _commandResult.Value ?? "Dismiss";
 
 
     internal static string SettingsJsonPath()
@@ -81,6 +95,7 @@ public class SettingsManager : JsonSettingsManager
         Settings.Add(_useStrictSearch);
         Settings.Add(_tagType);
         Settings.Add(_preferredEdition);
+        Settings.Add(_commandResult);
 
         // Load settings from file upon initialization
         LoadSettings();

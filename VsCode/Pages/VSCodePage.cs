@@ -43,7 +43,7 @@ internal sealed partial class VSCodePage : DynamicListPage
         foreach (var workspace in workspaces)
         {
             // add instance to the list
-            var command = new OpenVSCodeCommand(workspace.Instance.ExecutablePath, workspace.Path, this);
+            var command = new OpenVSCodeCommand(workspace.Instance.ExecutablePath, workspace.Path, this, _settingsManager.CommandResult);
 
             Details details = new Details()
             {

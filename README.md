@@ -24,10 +24,12 @@ This project provides a command palette extension for opening Visual Studio Code
 </a>
 
 ### Via Command Palette
+
 1. Open Command Palette
 2. Select "Command Palette - VS Code"
 
 ### Via Winget
+
 1. Open Command Prompt or PowerShell
 2. Run the following command:
    ```bash
@@ -42,15 +44,39 @@ This project provides a command palette extension for opening Visual Studio Code
 ## Settings
 
 - **Preferred Edition**: Determines which edition (Default or Insider) is used when a folder or workspace has been opened in both editions of VS Code.
-- **Use Strict Search**: Enables or disables strict search for workspaces.  
+  - Options:
+    - **Default**: Uses the standard VS Code edition
+    - **Insider**: Uses the VS Code Insider edition
+- **Use Strict Search**: Enables or disables strict search for workspaces.
   - **Strict Search**: Matches items where the search text appears as a contiguous substring in the item's title or subtitle. For example, searching for "abc" will match "abc" or "abc123" but not "a1b2c3".
 - **Show Details Panel**: Toggles the visibility of the details panel in the UI.
-- **Tag Type**: Configures the tags displayed for each workspace.  
-  - Options:  
-    - **None**: No tags are displayed.  
-    - **Type**: Displays the workspace type (e.g., Local, WSL, Remote).  
-    - **Target**: Displays the target instance name (e.g., VS Code, VS Code Insider).  
+- **Tags**: Configures the tags displayed for each workspace.
+  - Options:
+    - **None** (-): No tags are displayed.
+    - **Type**: Displays the workspace type (e.g., Local, WSL, Remote).
+    - **Target**: Displays the target instance name (e.g., VS Code, VS Code Insider).
     - **Type & Target**: Displays both the workspace type and the target instance name.
+- **Command Result Action**: Determines what should happen after opening a VS Code workspace.
+  - Options:
+    - **Dismiss**: Closes the Command Palette after opening the workspace
+    - **Go Back**: Returns to the previous Command Palette view
+    - **Keep Open**: Keeps the Command Palette open after opening the workspace
+
+## Technical Information
+
+- **Version**: 1.6.0.0
+- **Target Framework**: .NET 9.0 (Windows 10.0.22621.0)
+- **Minimum OS Version**: Windows 10 (10.0.19041.0)
+- **Architecture Support**: x64, ARM64
+- **Package Type**: MSIX (Microsoft Store app)
+
+## Project Structure
+
+- **Main Application**: [`CmdPalVsCode.cs`](VsCode/CmdPalVsCode.cs) - Main extension implementation
+- **Commands Provider**: [`CmdPalVsCodeCommandsProvider.cs`](VsCode/CmdPalVsCodeCommandsProvider.cs) - Command palette provider
+- **Settings Management**: [`SettingsManager.cs`](VsCode/Classes/SettingsManager.cs) - Handles user preferences
+- **VS Code Integration**: [`OpenVsCodeCommand.cs`](VsCode/Commands/OpenVsCodeCommand.cs) - Command execution logic
+- **UI Pages**: [`VSCodePage.cs`](VsCode/Pages/VSCodePage.cs) - Main interface page
 
 ## Contributing
 

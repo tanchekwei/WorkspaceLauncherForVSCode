@@ -1,0 +1,231 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.CommandPalette.Extensions.Toolkit;
+using WorkspaceLauncherForVSCode.Enums;
+using WorkspaceLauncherForVSCode.Properties;
+
+namespace WorkspaceLauncherForVSCode;
+
+public class SettingsManager : JsonSettingsManager
+{
+    private static readonly string _namespace = "vscode";
+
+    private static string Namespaced(string propertyName) => $"{_namespace}.{propertyName}";
+
+    private static readonly List<ChoiceSetSetting.Choice> _preferredEditionChoices =
+    [
+        new ChoiceSetSetting.Choice(Resource.setting_preferredEdition_option_default_label, "Default"),
+        new ChoiceSetSetting.Choice(Resource.setting_preferredEdition_option_insider_label, "Insider"),
+    ];
+
+    private static readonly List<ChoiceSetSetting.Choice> _commandResultChoices =
+    [
+        new ChoiceSetSetting.Choice(Resource.setting_commandResult_option_dismiss_label, nameof(CommandResultType.Dismiss)),
+        new ChoiceSetSetting.Choice(Resource.setting_commandResult_option_goback_label, nameof(CommandResultType.GoBack)),
+        new ChoiceSetSetting.Choice(Resource.setting_commandResult_option_keepopen_label, nameof(CommandResultType.KeepOpen)),
+    ];
+
+    private static readonly List<ChoiceSetSetting.Choice> _searchByChoices =
+    [
+        new ChoiceSetSetting.Choice("Path", nameof(SearchBy.Path)),
+        new ChoiceSetSetting.Choice("Title", nameof(SearchBy.Title)),
+        new ChoiceSetSetting.Choice("Both", nameof(SearchBy.Both)),
+    ];
+
+    private readonly ToggleSetting _useStrictSearch = new(
+        Namespaced(nameof(UseStrichtSearch)),
+        Resource.settings_useStrictSearch_label,
+        Resource.settings_useStrictSearch_desc,
+        false);
+
+    private readonly ToggleSetting _sortByFrequency = new(
+        Namespaced(nameof(SortByFrequency)),
+        "Sort by frequency",
+        "Sort workspaces by frequency of use.",
+        true);
+
+    private readonly ToggleSetting _enableLogging = new(
+        Namespaced(nameof(EnableLogging)),
+        "Enable Logging",
+        "Enables diagnostic logging for troubleshooting.",
+        false);
+
+    private readonly ToggleSetting _showDetails = new(
+       Namespaced(nameof(ShowDetails)),
+       Resource.settings_showDetails_label,
+       Resource.settings_showDetails_desc,
+       false);
+
+    private readonly ToggleSetting _showTypeTag = new(
+        Namespaced(nameof(_showTypeTag)),
+        Resource.setting_tagType_option_type_label,
+        "Show the 'Type' tag (Workspace/Folder)",
+        false);
+
+    private readonly ToggleSetting _showTargetTag = new(
+        Namespaced(nameof(_showTargetTag)),
+        Resource.setting_tagType_option_target_label,
+        "Show the 'Target' tag (Visual Studio Code/Insiders)",
+        false);
+
+    private readonly ToggleSetting _enableDefault = new(
+        Namespaced(nameof(_enableDefault)),
+        "Enable Visual Studio Code",
+        "Enable the default Visual Studio Code installation",
+        true);
+
+    private readonly ToggleSetting _enableSystem = new(
+        Namespaced(nameof(_enableSystem)),
+        "Enable Visual Studio Code (System)",
+        "Enable the system-wide Visual Studio Code installation",
+        true);
+
+    private readonly ToggleSetting _enableInsider = new(
+        Namespaced(nameof(_enableInsider)),
+        "Enable Visual Studio Code - Insiders",
+        "Enable the Insiders Visual Studio Code installation",
+        false);
+
+    private readonly ToggleSetting _enableCustom = new(
+        Namespaced(nameof(_enableCustom)),
+        "Enable Visual Studio Code (Custom)",
+        "Enable custom Visual Studio Code installations found in the PATH",
+        false);
+
+    private readonly ChoiceSetSetting _preferredEdition = new(
+        Namespaced(nameof(PreferredEdition)),
+        Resource.setting_preferredEdition_label,
+        Resource.setting_preferredEdition_desc,
+        _preferredEditionChoices);
+
+    private readonly ChoiceSetSetting _commandResult = new(
+        Namespaced(nameof(CommandResult)),
+        Resource.setting_commandResult_label,
+        Resource.setting_commandResult_desc,
+        _commandResultChoices);
+
+    private readonly ChoiceSetSetting _searchBy = new(
+        Namespaced(nameof(SearchBy)),
+        "Search By",
+        "Search by path, title or both.",
+        _searchByChoices);
+
+    private readonly TextSetting _pageSize = new(
+        Namespaced(nameof(PageSize)),
+        Resource.setting_pageSize_label,
+        Resource.setting_pageSize_desc,
+        "10");
+
+    public bool UseStrichtSearch => _useStrictSearch.Value;
+    public bool SortByFrequency => _sortByFrequency.Value;
+    public bool EnableLogging => _enableLogging.Value;
+    public bool ShowDetails => _showDetails.Value;
+    public string PreferredEdition => _preferredEdition.Value ?? "Default";
+
+    public TagType TagTypes
+    {
+        get
+        {
+            var tagType = TagType.None;
+            if (_showTypeTag.Value)
+            {
+                tagType |= TagType.Type;
+            }
+            if (_showTargetTag.Value)
+            {
+                tagType |= TagType.Target;
+            }
+            return tagType;
+        }
+        set
+        {
+            _showTypeTag.Value = value.HasFlag(TagType.Type);
+            _showTargetTag.Value = value.HasFlag(TagType.Target);
+        }
+    }
+
+    public VisualStudioCodeEdition EnabledEditions
+    {
+        get
+        {
+            var editions = VisualStudioCodeEdition.None;
+            if (_enableDefault.Value) editions |= VisualStudioCodeEdition.Default;
+            if (_enableSystem.Value) editions |= VisualStudioCodeEdition.System;
+            if (_enableInsider.Value) editions |= VisualStudioCodeEdition.Insider;
+            if (_enableCustom.Value) editions |= VisualStudioCodeEdition.Custom;
+            return editions;
+        }
+    }
+
+    public CommandResultType CommandResult
+    {
+        get
+        {
+            if (Enum.TryParse<CommandResultType>(_commandResult.Value, out var result))
+            {
+                return result;
+            }
+            return CommandResultType.Dismiss;
+        }
+    }
+
+    public SearchBy SearchBy
+    {
+        get
+        {
+            if (Enum.TryParse<SearchBy>(_searchBy.Value, out var result))
+            {
+                return result;
+            }
+            return SearchBy.Both;
+        }
+    }
+
+    public int PageSize
+    {
+        get
+        {
+            if (int.TryParse(_pageSize.Value, out int size) && size > 0)
+            {
+                return size;
+            }
+            return 10;
+        }
+    }
+
+    internal static string SettingsJsonPath()
+    {
+        var directory = Utilities.BaseSettingsPath("Microsoft.CmdPal");
+        Directory.CreateDirectory(directory);
+        return Path.Combine(directory, "settings.json");
+    }
+
+    public SettingsManager()
+    {
+        FilePath = SettingsJsonPath();
+
+        Settings.Add(_showDetails);
+        Settings.Add(_useStrictSearch);
+        Settings.Add(_sortByFrequency);
+        Settings.Add(_showTypeTag);
+        Settings.Add(_showTargetTag);
+        Settings.Add(_enableDefault);
+        Settings.Add(_enableSystem);
+        Settings.Add(_enableInsider);
+        Settings.Add(_enableCustom);
+        Settings.Add(_preferredEdition);
+        Settings.Add(_commandResult);
+        Settings.Add(_pageSize);
+        Settings.Add(_searchBy);
+        Settings.Add(_enableLogging);
+
+        // Load settings from file upon initialization
+        LoadSettings();
+
+        Settings.SettingsChanged += (s, a) =>
+        {
+            SaveSettings();
+        };
+    }
+}

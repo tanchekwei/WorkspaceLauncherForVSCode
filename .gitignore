@@ -66,9 +66,6 @@ artifacts/
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 
-# StyleCop
-StyleCopReport.xml
-
 # Files built by Visual Studio
 *_i.c
 *_p.c
@@ -355,7 +352,7 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
-# Ionide (cross platform F# VS Code tools) working folder
+# Ionide (cross platform F# Visual Studio Code tools) working folder
 .ionide/
 
 # Fody - auto-generated XML schema

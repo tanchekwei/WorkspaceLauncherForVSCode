@@ -1,16 +1,29 @@
-# Command Palette for Visual Studio Code
+# Workspace Launcher for VS Code
 
 ## Overview
 
 This project provides a command palette extension for opening Visual Studio Code workspaces.
 
-![Command Palette for Visual Studio Code](./Assets/screenshot.png)
+![Workspace Launcher for VS Code](./Assets/screenshot1.png)
+
+## Replacing PowerToys Run
+Suggested usage to replace PowerToys Run with this extension:
+
+1. Open the Command Palette settings > Extensions > Workspace Launcher for VS Code.
+2. Assign **Alt + Space** as the global hotkey (requires disabling PowerToys Run) or assign `{` as an alias with Direct toggled.
+
+![Replacing PowerToys Run](./Assets/screenshot2.png)
 
 ## Features
 
 - **Workspace Management**: Retrieve and display a list of available workspaces, including their paths and types (e.g., Local, WSL, Remote).
 - **Command Execution**: Open workspaces in Visual Studio Code using a dedicated command.
 - **Multi-Installation Support**: Works for multiple installations of Visual Studio Code, including Insider and system installations.
+- **Secondary Actions**: Access additional commands for each workspace entry:
+    - **Copy Path**: Copies the full file path of the workspace or folder to the clipboard.
+    - **Remove from List**: Removes the workspace entry from Visual Studio Code's list of recently opened projects. A confirmation is required to prevent accidental removal.
+    - **Open in Explorer**: Opens the workspace or folder location in the default file explorer.
+    - **Refresh Workspaces**: Manually reloads the list of workspaces to reflect any recent changes.
 
 ## Installation
 
@@ -19,21 +32,21 @@ This project provides a command palette extension for opening Visual Studio Code
 
 ### Windows Store
 
-<a href="https://apps.microsoft.com/detail/9PKCGVQ05TG1?mode=direct">
+<!-- <a href="https://apps.microsoft.com/detail/9PKCGVQ05TG1?mode=direct">
 	<img src="https://get.microsoft.com/images/en-us%20light.svg" width="300"/>
-</a>
+</a> -->
 
 ### Via Command Palette
 
 1. Open Command Palette
-2. Select "Command Palette - VS Code"
+2. Select "Workspace Launcher for VS Code"
 
 ### Via Winget
 
 1. Open Command Prompt or PowerShell
 2. Run the following command:
    ```bash
-   winget install JonahFintzDEV.CommandPalette-VSCode
+   winget install 15722UsefulApp.WorkspaceLauncherForVSCode
    ```
 
 ### Manual Installation
@@ -43,40 +56,20 @@ This project provides a command palette extension for opening Visual Studio Code
 
 ## Settings
 
-- **Preferred Edition**: Determines which edition (Default or Insider) is used when a folder or workspace has been opened in both editions of VS Code.
-  - Options:
-    - **Default**: Uses the standard VS Code edition
-    - **Insider**: Uses the VS Code Insider edition
+- **Preferred Edition**: Determines which edition (Default or Insider) is used when a folder or workspace has been opened in both editions of Visual Studio Code.
+- **Search By**: Choose what to search by (Path, Title, or Both).
 - **Use Strict Search**: Enables or disables strict search for workspaces.
-  - **Strict Search**: Matches items where the search text appears as a contiguous substring in the item's title or subtitle. For example, searching for "abc" will match "abc" or "abc123" but not "a1b2c3".
-- **Show Details Panel**: Toggles the visibility of the details panel in the UI.
-- **Tags**: Configures the tags displayed for each workspace.
-  - Options:
-    - **None** (-): No tags are displayed.
-    - **Type**: Displays the workspace type (e.g., Local, WSL, Remote).
-    - **Target**: Displays the target instance name (e.g., VS Code, VS Code Insider).
-    - **Type & Target**: Displays both the workspace type and the target instance name.
-- **Command Result Action**: Determines what should happen after opening a VS Code workspace.
-  - Options:
-    - **Dismiss**: Closes the Command Palette after opening the workspace
-    - **Go Back**: Returns to the previous Command Palette view
-    - **Keep Open**: Keeps the Command Palette open after opening the workspace
+- **Page Size**: Sets the number of items to load and display at one time.
+- **Show Details Panel**: Toggles the visibility of the details panel.
+- **Tags**: Configures the tags displayed for each workspace (Type, Target, or both).
+- **Enable Visual Studio Code Installations**: Toggles which installations of Visual Studio Code to search for workspaces.
+- **Command Result Action**: Determines what should happen after opening a Visual Studio Code workspace.
 
-## Technical Information
+## How It Works
 
-- **Version**: 1.6.0.0
-- **Target Framework**: .NET 9.0 (Windows 10.0.22621.0)
-- **Minimum OS Version**: Windows 10 (10.0.19041.0)
-- **Architecture Support**: x64, ARM64
-- **Package Type**: MSIX (Microsoft Store app)
+This extension scans for installations of Visual Studio Code on your system, including stable, Insiders, and system-wide installations. It then reads the workspace history from Visual Studio Code's internal storage files (`state.vscdb` and `storage.json`) to populate the list of recent workspaces.
 
-## Project Structure
-
-- **Main Application**: [`CmdPalVsCode.cs`](VsCode/CmdPalVsCode.cs) - Main extension implementation
-- **Commands Provider**: [`CmdPalVsCodeCommandsProvider.cs`](VsCode/CmdPalVsCodeCommandsProvider.cs) - Command palette provider
-- **Settings Management**: [`SettingsManager.cs`](VsCode/Classes/SettingsManager.cs) - Handles user preferences
-- **VS Code Integration**: [`OpenVsCodeCommand.cs`](VsCode/Commands/OpenVsCodeCommand.cs) - Command execution logic
-- **UI Pages**: [`VSCodePage.cs`](VsCode/Pages/VSCodePage.cs) - Main interface page
+For more detailed technical information about the project's architecture and components, please see the [Project Guide](./GUIDE.md).
 
 ## Contributing
 

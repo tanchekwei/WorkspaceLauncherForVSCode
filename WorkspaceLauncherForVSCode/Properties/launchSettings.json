@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "WorkspaceLauncherForVSCode (Package)": {
+      "commandName": "MsixPackage",
+      "doNotLaunchApp": true
+    },
+    "WorkspaceLauncherForVSCode (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

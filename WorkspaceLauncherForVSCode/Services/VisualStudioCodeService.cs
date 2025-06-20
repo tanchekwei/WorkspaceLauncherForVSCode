@@ -1,10 +1,11 @@
-using System;
+// Modifications copyright (c) 2025 tanchekwei 
+// Licensed under the MIT License. See the LICENSE file in the project root for details.
+
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CommandPalette.Extensions.Toolkit;
 using WorkspaceLauncherForVSCode.Classes;
 using WorkspaceLauncherForVSCode.Enums;
 
@@ -16,17 +17,21 @@ namespace WorkspaceLauncherForVSCode.Services
 
         public void LoadInstances(VisualStudioCodeEdition enabledEditions, string preferredEdition)
         {
-            // using var logger = new TimeLogger();
+#if DEBUG
+            using var logger = new TimeLogger();
+#endif
             Instances = VisualStudioCodeInstanceProvider.GetInstances(enabledEditions, preferredEdition);
         }
 
-        public async Task<List<VisualStudioCodeWorkspace>> GetWorkspacesAsync(WorkspaceStorage workspaceStorage, CancellationToken cancellationToken)
+        public async Task<List<VisualStudioCodeWorkspace>> GetWorkspacesAsync(List<VisualStudioCodeWorkspace> dbWorkspaces, CancellationToken cancellationToken)
         {
-            // using var logger = new TimeLogger();
+#if DEBUG
+            using var logger = new TimeLogger();
+#endif
             var workspaceMap = new ConcurrentDictionary<string, VisualStudioCodeWorkspace>();
             await Parallel.ForEachAsync(Instances, cancellationToken, async (instance, ct) =>
             {
-                var workspaces = await VisualStudioCodeWorkspaceProvider.GetWorkspacesAsync(instance, workspaceStorage, ct);
+                var workspaces = await VisualStudioCodeWorkspaceProvider.GetWorkspacesAsync(instance, dbWorkspaces, ct);
                 foreach (var workspace in workspaces)
                 {
                     if (workspace.Path == null) continue;
@@ -50,8 +55,12 @@ namespace WorkspaceLauncherForVSCode.Services
             });
 
             var result = workspaceMap.Values.ToList();
-            new ToastStatusMessage($"Loaded {result.Count} workspaces").Show();
             return result;
+        }
+
+        public Task<List<VisualStudioCodeWorkspace>> GetVisualStudioSolutions(List<VisualStudioCodeWorkspace> dbWorkspaces, bool showPrerelease)
+        {
+            return VisualStudioProvider.GetSolutions(dbWorkspaces, showPrerelease);
         }
     }
 }

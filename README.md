@@ -1,29 +1,23 @@
-# Workspace Launcher for VS Code
+# Workspace Launcher for Visual Studio / Code
 
 ## Overview
 
-This project provides a command palette extension for opening Visual Studio Code workspaces.
+This project provides a command palette extension for opening Visual Studio solutions and Visual Studio Code workspaces from a single, unified interface.
 
-![Workspace Launcher for VS Code](./Assets/screenshot1.png)
-
-## Replacing PowerToys Run
-Suggested usage to replace PowerToys Run with this extension:
-
-1. Open the Command Palette settings > Extensions > Workspace Launcher for VS Code.
-2. Assign **Alt + Space** as the global hotkey (requires disabling PowerToys Run) or assign `{` as an alias with Direct toggled.
-
-![Replacing PowerToys Run](./Assets/screenshot2.png)
+![Workspace Launcher for Visual Studio / Code](./Assets/screenshot1.png)
 
 ## Features
 
+- **Unified Launcher**: Launch both Visual Studio solutions and Visual Studio Code workspaces from a single, convenient interface.
+- **Window-Switching**: If a Visual Studio solution is already open, the extension will switch to the existing window instead of opening a new instance.
 - **Workspace Management**: Retrieve and display a list of available workspaces, including their paths and types (e.g., Local, WSL, Remote).
-- **Command Execution**: Open workspaces in Visual Studio Code using a dedicated command.
-- **Multi-Installation Support**: Works for multiple installations of Visual Studio Code, including Insider and system installations.
-- **Secondary Actions**: Access additional commands for each workspace entry:
-    - **Copy Path**: Copies the full file path of the workspace or folder to the clipboard.
-    - **Remove from List**: Removes the workspace entry from Visual Studio Code's list of recently opened projects. A confirmation is required to prevent accidental removal.
-    - **Open in Explorer**: Opens the workspace or folder location in the default file explorer.
-    - **Refresh Workspaces**: Manually reloads the list of workspaces to reflect any recent changes.
+- **Command Execution**: Open solutions in Visual Studio and workspaces in Visual Studio Code using dedicated commands.
+- **Multi-Installation Support**: Works for multiple installations of Visual Studio and Visual Studio Code, including Insider and system installations.
+- **Secondary Actions**: Access additional commands for each entry:
+    - **Copy Path**: Copies the full file path of the solution, workspace, or folder to the clipboard.
+    - **Remove from List**: Removes the workspace entry from Visual Studio Code's list of recently opened projects (not available for Visual Studio solutions).
+    - **Open in Explorer**: Opens the solution, workspace, or folder location in the default file explorer.
+    - **Refresh Workspaces**: Manually reloads the list of solutions and workspaces to reflect any recent changes.
 
 ## Installation
 
@@ -39,7 +33,7 @@ Suggested usage to replace PowerToys Run with this extension:
 ### Via Command Palette
 
 1. Open Command Palette
-2. Select "Workspace Launcher for VS Code"
+2. Select "Workspace Launcher for Visual Studio / Code"
 
 <!-- ### Via Winget
 
@@ -49,10 +43,19 @@ Suggested usage to replace PowerToys Run with this extension:
    winget install 15722UsefulApp.WorkspaceLauncherForVSCode
    ```
 -->
+
 ### Manual Installation
 
 1. Make sure you use the latest version of PowerToys.
 2. Install the application by double-clicking the `.msix` file.
+
+## Replacing PowerToys Run
+Suggested usage to replace PowerToys Run with this extension:
+
+1. Open the Command Palette settings > Extensions > Workspace Launcher for Visual Studio / Code.
+2. Assign **Alt + Space** as the global hotkey (requires disabling PowerToys Run) or assign `{` as an alias with Direct toggled.
+
+![Replacing PowerToys Run](./Assets/screenshot2.png)
 
 ## Settings
 
@@ -67,7 +70,12 @@ Suggested usage to replace PowerToys Run with this extension:
 
 ## How It Works
 
-This extension scans for installations of Visual Studio Code on your system, including stable, Insiders, and system-wide installations. It then reads the workspace history from Visual Studio Code's internal storage files (`state.vscdb` and `storage.json`) to populate the list of recent workspaces.
+This extension discovers installations of Visual Studio and Visual Studio Code on your system.
+- For **Visual Studio Code**, it reads the workspace history from the internal storage files (`state.vscdb` and `storage.json`).
+- For **Visual Studio**, it uses `vswhere.exe` to find installations and then reads their configuration files to discover recent solutions.
+- The extension also includes logic from the **WindowWalker** extension to detect if a solution is already open. If so, it switches to the existing Visual Studio window instead of creating a new one.
+
+The results are then combined into a single, unified list for easy access.
 
 For more detailed technical information about the project's architecture and components, please see the [Project Guide](./GUIDE.md).
 

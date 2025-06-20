@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Modifications copyright (c) 2025 tanchekwei 
+// Licensed under the MIT License. See the LICENSE file in the project root for details.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.CommandPalette.Extensions.Toolkit;
@@ -28,17 +31,10 @@ public class SettingsManager : JsonSettingsManager
 
     private static readonly List<ChoiceSetSetting.Choice> _searchByChoices =
     [
-        new ChoiceSetSetting.Choice("Path", nameof(SearchBy.Path)),
         new ChoiceSetSetting.Choice("Title", nameof(SearchBy.Title)),
+        new ChoiceSetSetting.Choice("Path", nameof(SearchBy.Path)),
         new ChoiceSetSetting.Choice("Both", nameof(SearchBy.Both)),
     ];
-
-    private readonly ToggleSetting _useStrictSearch = new(
-        Namespaced(nameof(UseStrichtSearch)),
-        Resource.settings_useStrictSearch_label,
-        Resource.settings_useStrictSearch_desc,
-        false);
-
     private readonly ToggleSetting _sortByFrequency = new(
         Namespaced(nameof(SortByFrequency)),
         "Sort by frequency",
@@ -68,6 +64,12 @@ public class SettingsManager : JsonSettingsManager
         Resource.setting_tagType_option_target_label,
         "Show the 'Target' tag (Visual Studio Code/Insiders)",
         false);
+
+    private readonly ToggleSetting _enableVisualStudio = new(
+        Namespaced(nameof(_enableVisualStudio)),
+        "Enable Visual Studio",
+        "Enable Visual Studio installation",
+        true);
 
     private readonly ToggleSetting _enableDefault = new(
         Namespaced(nameof(_enableDefault)),
@@ -117,11 +119,11 @@ public class SettingsManager : JsonSettingsManager
         Resource.setting_pageSize_desc,
         "10");
 
-    public bool UseStrichtSearch => _useStrictSearch.Value;
     public bool SortByFrequency => _sortByFrequency.Value;
     public bool EnableLogging => _enableLogging.Value;
     public bool ShowDetails => _showDetails.Value;
     public string PreferredEdition => _preferredEdition.Value ?? "Default";
+    public bool EnableVisualStudio => _enableVisualStudio.Value;
 
     public TagType TagTypes
     {
@@ -178,7 +180,7 @@ public class SettingsManager : JsonSettingsManager
             {
                 return result;
             }
-            return SearchBy.Both;
+            return SearchBy.Title;
         }
     }
 
@@ -206,10 +208,10 @@ public class SettingsManager : JsonSettingsManager
         FilePath = SettingsJsonPath();
 
         Settings.Add(_showDetails);
-        Settings.Add(_useStrictSearch);
         Settings.Add(_sortByFrequency);
         Settings.Add(_showTypeTag);
         Settings.Add(_showTargetTag);
+        Settings.Add(_enableVisualStudio);
         Settings.Add(_enableDefault);
         Settings.Add(_enableSystem);
         Settings.Add(_enableInsider);

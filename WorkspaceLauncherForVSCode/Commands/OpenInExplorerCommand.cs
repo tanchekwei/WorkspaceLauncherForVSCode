@@ -4,15 +4,14 @@
 using System.IO;
 using Microsoft.CmdPal.Ext.System.Helpers;
 using Microsoft.CommandPalette.Extensions.Toolkit;
-using WorkspaceLauncherForVSCode.Commands;
 
 namespace WorkspaceLauncherForVSCode.Commands
 {
     public sealed partial class OpenInExplorerCommand : InvokableCommand
     {
-        private readonly VisualStudioCodeWorkspace workspace;
+        private readonly VisualStudioCodeWorkspace? workspace;
         private readonly VisualStudioCodePage page;
-        public OpenInExplorerCommand(string arguments, VisualStudioCodeWorkspace workspace, VisualStudioCodePage page, string name = "Open in Explorer", string path = "explorer.exe", string? workingDir = null, OpenInShellHelper.ShellRunAsType runAs = OpenInShellHelper.ShellRunAsType.None, bool runWithHiddenWindow = false)
+        public OpenInExplorerCommand(string arguments, VisualStudioCodeWorkspace? workspace, VisualStudioCodePage page, string name = "Open in Explorer", string path = "explorer.exe", string? workingDir = null, OpenInShellHelper.ShellRunAsType runAs = OpenInShellHelper.ShellRunAsType.None, bool runWithHiddenWindow = false)
         {
             Name = name;
             _path = path;
@@ -20,7 +19,7 @@ namespace WorkspaceLauncherForVSCode.Commands
             _workingDir = workingDir;
             _runAs = runAs;
             _runWithHiddenWindow = runWithHiddenWindow;
-            Icon = VisualStudioCode.FileExplorerIconInfo;
+            Icon = Classes.Icon.FileExplorer;
             this.workspace = workspace;
             this.page = page;
         }
@@ -36,7 +35,10 @@ namespace WorkspaceLauncherForVSCode.Commands
             {
                 return pathNotFoundResult;
             }
-
+            if (workspace?.WorkspaceType == Enums.WorkspaceType.Solution)
+            {
+                _arguments = Path.GetDirectoryName(_arguments);
+            }
             OpenInShellHelper.OpenInShell(_path, _arguments);
             return CommandResult.Dismiss();
         }

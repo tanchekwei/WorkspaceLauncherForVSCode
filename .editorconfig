@@ -1,0 +1,8 @@
+# File-scoped namespace declarations
+dotnet_diagnostic.IDE0161.severity = refactoring
+csharp_style_namespace_declarations = file_scoped
+# Sort using and Import directives with System.* appearing first
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+dotnet_style_namespace_match_folder = true
+dotnet_diagnostic.IDE0130.severity = warning

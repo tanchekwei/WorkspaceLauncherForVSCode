@@ -1,3 +1,6 @@
+// Modifications copyright (c) 2025 tanchekwei 
+// Licensed under the MIT License. See the LICENSE file in the project root for details.
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,7 +18,9 @@ namespace WorkspaceLauncherForVSCode.Workspaces.Readers
     {
         public static async Task<IEnumerable<VisualStudioCodeWorkspace>> GetWorkspacesAsync(VisualStudioCodeInstance instance, CancellationToken cancellationToken)
         {
-            // using var logger = new TimeLogger();
+#if DEBUG
+            using var logger = new TimeLogger();
+#endif
             var workspaces = new ConcurrentBag<VisualStudioCodeWorkspace>();
             var storageFilePath = Path.Combine(instance.StoragePath, "storage.json");
 
@@ -64,12 +69,12 @@ namespace WorkspaceLauncherForVSCode.Workspaces.Readers
 
         public static async Task<int> RemoveWorkspaceAsync(VisualStudioCodeWorkspace workspace)
         {
-            if (workspace.Instance?.StoragePath is null)
+            if (workspace.VSCodeInstance?.StoragePath is null)
             {
                 return 0;
             }
 
-            var storageFilePath = Path.Combine(workspace.Instance.StoragePath, "storage.json");
+            var storageFilePath = Path.Combine(workspace.VSCodeInstance.StoragePath, "storage.json");
             if (!File.Exists(storageFilePath)) return 0;
 
             var jsonString = await File.ReadAllTextAsync(storageFilePath);

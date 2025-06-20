@@ -1,4 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿// Modifications copyright (c) 2025 tanchekwei 
+// Licensed under the MIT License. See the LICENSE file in the project root for details.
+
+using System.Text.Json.Serialization;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using WorkspaceLauncherForVSCode.Enums;
 
@@ -44,10 +47,10 @@ public class VisualStudioCodeInstance
         switch (VisualStudioCodeType)
         {
             case VisualStudioCodeType.Insider:
-                return VisualStudioCode.InsiderIconInfo;
+                return Classes.Icon.VisualStudioCodeInsider;
             case VisualStudioCodeType.Default:
             default:
-                return VisualStudioCode.IconInfo;
+                return Classes.Icon.VisualStudioCode;
         }
     }
 }

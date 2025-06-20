@@ -1,7 +1,10 @@
 MIT License
 
+Copyright (c) 2025 Davide Giacometti
 Copyright (c) 2025 Jonah Fintz
 Copyright (c) 2025 tanchekwei
+Copyright (c) 2020 Betsegaw Tadele
+Copyright (c) 2025 Microsoft Corporation
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

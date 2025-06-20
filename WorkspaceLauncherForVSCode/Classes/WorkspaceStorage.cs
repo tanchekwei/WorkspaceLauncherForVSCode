@@ -1,21 +1,45 @@
-using Microsoft.Data.Sqlite;
+// Modifications copyright (c) 2025 tanchekwei 
+// Licensed under the MIT License. See the LICENSE file in the project root for details.
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
+using Microsoft.Data.Sqlite;
 
 namespace WorkspaceLauncherForVSCode.Classes
 {
     public sealed partial class WorkspaceStorage : IDisposable
     {
         private readonly SqliteConnection _connection;
+        private SqliteCommand? _saveWorkspaceCommand;
         private const string DbName = "workspaces.db";
+
+        private static class Queries
+        {
+            public const string Initialize = @"
+                CREATE TABLE IF NOT EXISTS Workspaces (
+                    Path TEXT PRIMARY KEY,
+                    Name TEXT,
+                    Type INTEGER,
+                    Frequency INTEGER DEFAULT 0,
+                    LastAccessed TEXT
+                );";
+
+            public const string GetWorkspaces = "SELECT Path, Name, Type, Frequency, LastAccessed FROM Workspaces";
+
+            public const string SaveWorkspace = @"
+                INSERT OR REPLACE INTO Workspaces (Path, Name, Type, Frequency, LastAccessed)
+                VALUES (@Path, @Name, @Type, COALESCE((SELECT Frequency FROM Workspaces WHERE Path = @Path), 0), @LastAccessed)";
+
+            public const string UpdateFrequency = "UPDATE Workspaces SET Frequency = Frequency + 1, LastAccessed = @LastAccessed WHERE Path = @path";
+        }
 
         public WorkspaceStorage()
         {
-            var dbPath = Path.Combine(Utilities.BaseSettingsPath("WorkspaceLauncherForVSCode"), DbName);
+            var dbPath = Path.Combine(Utilities.BaseSettingsPath(Constant.AppName), DbName);
             _connection = new SqliteConnection($"Data Source={dbPath}");
             _connection.Open();
             InitializeDatabase();
@@ -24,15 +48,7 @@ namespace WorkspaceLauncherForVSCode.Classes
         private void InitializeDatabase()
         {
             using var command = _connection.CreateCommand();
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Workspaces (
-                    Path TEXT PRIMARY KEY,
-                    Name TEXT,
-                    Type INTEGER,
-                    Frequency INTEGER DEFAULT 0,
-                    LastAccessed TEXT
-                );
-            ";
+            command.CommandText = Queries.Initialize;
             command.ExecuteNonQuery();
         }
 
@@ -40,7 +56,7 @@ namespace WorkspaceLauncherForVSCode.Classes
         {
             var workspaces = new List<VisualStudioCodeWorkspace>();
             using var command = _connection.CreateCommand();
-            command.CommandText = "SELECT Path, Name, Type, Frequency, LastAccessed FROM Workspaces";
+            command.CommandText = Queries.GetWorkspaces;
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -58,32 +74,48 @@ namespace WorkspaceLauncherForVSCode.Classes
 
         public async Task SaveWorkspacesAsync(IEnumerable<VisualStudioCodeWorkspace> workspaces)
         {
-            // using var logger = new TimeLogger();
+#if DEBUG
+            using var logger = new TimeLogger();
+#endif
             using var transaction = _connection.BeginTransaction();
+
+            if (_saveWorkspaceCommand == null)
+            {
+                _saveWorkspaceCommand = _connection.CreateCommand();
+                _saveWorkspaceCommand.CommandText = Queries.SaveWorkspace;
+                _saveWorkspaceCommand.Parameters.Add("@Path", SqliteType.Text);
+                _saveWorkspaceCommand.Parameters.Add("@Name", SqliteType.Text);
+                _saveWorkspaceCommand.Parameters.Add("@Type", SqliteType.Integer);
+                _saveWorkspaceCommand.Parameters.Add("@LastAccessed", SqliteType.Text);
+            }
+            _saveWorkspaceCommand.Transaction = transaction;
+
+            var pathParam = _saveWorkspaceCommand.Parameters["@Path"];
+            var nameParam = _saveWorkspaceCommand.Parameters["@Name"];
+            var typeParam = _saveWorkspaceCommand.Parameters["@Type"];
+            var lastAccessedParam = _saveWorkspaceCommand.Parameters["@LastAccessed"];
+
             foreach (var workspace in workspaces)
             {
-                if (workspace.Path == null || workspace.Path == null)
+                if (string.IsNullOrEmpty(workspace.Path))
                 {
                     continue;
                 }
-                var command = _connection.CreateCommand();
-                command.Transaction = transaction;
-                command.CommandText = @"
-                    INSERT OR REPLACE INTO Workspaces (Path, Name, Type, Frequency, LastAccessed)
-                    VALUES (@Path, @Name, @Type, COALESCE((SELECT Frequency FROM Workspaces WHERE Path = @Path), 0), @LastAccessed)";
-                command.Parameters.AddWithValue("@Path", workspace.Path);
-                command.Parameters.AddWithValue("@Name", workspace.Name ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@Type", workspace.WorkspaceType);
-                command.Parameters.AddWithValue("@LastAccessed", workspace.LastAccessed.ToString("o"));
-                await command.ExecuteNonQueryAsync();
+
+                pathParam.Value = workspace.Path;
+                nameParam.Value = workspace.Name ?? (object)DBNull.Value;
+                typeParam.Value = (int)workspace.WorkspaceType;
+                lastAccessedParam.Value = workspace.LastAccessed.ToString("o");
+                await _saveWorkspaceCommand.ExecuteNonQueryAsync();
             }
+
             transaction.Commit();
         }
 
         public async Task UpdateWorkspaceFrequencyAsync(string path)
         {
             using var command = _connection.CreateCommand();
-            command.CommandText = "UPDATE Workspaces SET Frequency = Frequency + 1, LastAccessed = @LastAccessed WHERE Path = @path";
+            command.CommandText = Queries.UpdateFrequency;
             command.Parameters.AddWithValue("@path", path);
             command.Parameters.AddWithValue("@LastAccessed", DateTime.Now.ToString("o"));
             await command.ExecuteNonQueryAsync();
@@ -91,6 +123,7 @@ namespace WorkspaceLauncherForVSCode.Classes
 
         public void Dispose()
         {
+            _saveWorkspaceCommand?.Dispose();
             _connection.Close();
             _connection.Dispose();
         }

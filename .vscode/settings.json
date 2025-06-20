@@ -1,0 +1,6 @@
+{
+  "[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
+    "editor.codeActionsOnSave": ["source.organizeImports", "source.fixAll"]
+  },
+}

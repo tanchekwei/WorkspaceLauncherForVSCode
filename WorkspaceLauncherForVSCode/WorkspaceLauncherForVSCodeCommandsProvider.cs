@@ -1,3 +1,6 @@
+// Modifications copyright (c) 2025 tanchekwei 
+// Licensed under the MIT License. See the LICENSE file in the project root for details.
+
 using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using WorkspaceLauncherForVSCode.Classes;
@@ -11,31 +14,41 @@ public partial class WorkspaceLauncherForVSCodeCommandsProvider : CommandProvide
     private readonly SettingsManager _settingsManager;
     private readonly VisualStudioCodeService _vscodeService;
     private readonly SettingsListener _settingsListener;
+    private readonly VisualStudioCodePage _page;
 
     public WorkspaceLauncherForVSCodeCommandsProvider()
     {
-        // using var logger = new TimeLogger();
+#if DEBUG
+        using var logger = new TimeLogger();
+#endif
         _settingsManager = new SettingsManager();
         _vscodeService = new VisualStudioCodeService();
-        DisplayName = "Workspace Launcher for VS Code";
-        Icon = VisualStudioCode.IconInfo;
+        DisplayName = "Workspace Launcher for Visual Studio / Code";
+#if DEBUG
+        DisplayName += " (Dev)";
+#endif
+        Icon = Classes.Icon.VisualStudioAndVisualStudioCode;
         Settings = _settingsManager.Settings;
 
         _vscodeService.LoadInstances(_settingsManager.EnabledEditions, _settingsManager.PreferredEdition);
 
         _settingsListener = new SettingsListener(_settingsManager);
         _settingsListener.InstanceSettingsChanged += OnInstanceSettingsChanged;
+
+        _page = new VisualStudioCodePage(_settingsManager, _vscodeService, _settingsListener);
     }
 
     private void OnInstanceSettingsChanged(object? sender, System.EventArgs e)
     {
         _vscodeService.LoadInstances(_settingsManager.EnabledEditions, _settingsManager.PreferredEdition);
+        _page.ClearAllItems();
+        _page.UpdateSearchText(_page.SearchText, "");
     }
 
     public override ICommandItem[] TopLevelCommands()
     {
         return [
-            new CommandItem(new VisualStudioCodePage(_settingsManager, _vscodeService, _settingsListener)) {
+            new CommandItem(_page) {
                 Title = DisplayName,
                 MoreCommands = [
                     new CommandContextItem(Settings!.SettingsPage),

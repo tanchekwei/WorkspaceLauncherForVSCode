@@ -1,8 +1,8 @@
-﻿using System.IO;
+﻿// Modifications copyright (c) 2025 tanchekwei 
+// Licensed under the MIT License. See the LICENSE file in the project root for details.
+
 using System.Threading.Tasks;
-using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
-using WorkspaceLauncherForVSCode.Classes;
 using WorkspaceLauncherForVSCode.Commands;
 using WorkspaceLauncherForVSCode.Enums;
 
@@ -11,13 +11,13 @@ namespace WorkspaceLauncherForVSCode;
 /// <summary>
 /// Command to open a Visual Studio Code workspace.
 /// </summary>
-internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand
+internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand, IHasWorkspace
 {
     public override string Name => "Open";
     private readonly VisualStudioCodePage page;
     private readonly CommandResultType commandResult;
 
-    internal VisualStudioCodeWorkspace Workspace { get; }
+    public VisualStudioCodeWorkspace Workspace { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenVisualStudioCodeCommand"/> class.
@@ -30,8 +30,13 @@ internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand
         Workspace = workspace;
         this.page = page;
         this.commandResult = commandResult;
-        this.Icon = VisualStudioCode.IconInfo;
+        this.Icon = Classes.Icon.VisualStudioCode;
         Name += $" {workspace.WorkspaceType.ToString()}";
+
+        if (workspace.WorkspaceType == WorkspaceType.Solution)
+        {
+            //this.Subtitle = string.Empty;
+        }
     }
 
     /// <summary>
@@ -40,7 +45,12 @@ internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand
     /// <returns>The result of the command execution.</returns>
     public override CommandResult Invoke()
     {
-        if (Workspace.WindowsPath is null || Workspace.Path is null || Workspace.Instance is null)
+        if (Workspace.WorkspaceType == WorkspaceType.Solution)
+        {
+            return CommandResult.Confirm(new ConfirmationArgs { Title = "Error", Description = "Cannot open a solution with this command." });
+        }
+
+        if (Workspace.WindowsPath is null || Workspace.Path is null || Workspace.VSCodeInstance is null)
         {
             return CommandResult.Confirm(new ConfirmationArgs { Title = "Error", Description = "Workspace path, or instance is null. Cannot open." });
         }
@@ -62,7 +72,7 @@ internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand
             arguments = $"--folder-uri \"{Workspace.Path}\"";
         }
 
-        ShellHelpers.OpenInShell(Workspace.Instance.ExecutablePath, arguments, null, ShellHelpers.ShellRunAsType.None, false);
+        ShellHelpers.OpenInShell(Workspace.VSCodeInstance.ExecutablePath, arguments, null, ShellHelpers.ShellRunAsType.None, false);
 
         // Update frequency
         Task.Run(() => page.UpdateFrequencyAsync(Workspace.Path));

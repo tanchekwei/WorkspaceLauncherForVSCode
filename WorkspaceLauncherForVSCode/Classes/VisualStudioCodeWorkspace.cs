@@ -1,10 +1,13 @@
-﻿using System;
+﻿// Modifications copyright (c) 2025 tanchekwei 
+// Licensed under the MIT License. See the LICENSE file in the project root for details.
+
+using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using WorkspaceLauncherForVSCode.Enums;
 using WorkspaceLauncherForVSCode.Helpers;
 using WorkspaceLauncherForVSCode.Properties;
+using WorkspaceLauncherForVSCode.Services.VisualStudio.Models;
 
 namespace WorkspaceLauncherForVSCode;
 
@@ -15,21 +18,17 @@ public class VisualStudioCodeWorkspace
 {
     public string? Path { get; set; }
     public string? Name { get; set; }
-    public VisualStudioCodeInstance? Instance { get; set; }
+    public VisualStudioCodeInstance? VSCodeInstance { get; set; }
+    public VisualStudioInstance? VSInstance { get; set; }
     public string? WindowsPath { get; set; }
     public WorkspaceType WorkspaceType { get; set; }
     public VisualStudioCodeWorkspaceSource Source { get; set; }
     public List<string> SourcePath { get; set; } = new();
-    [JsonIgnore]
     public string WorkspaceName { get; set; } = "";
-    [JsonIgnore]
     public string VSTypeString { get; set; } = "";
-    [JsonIgnore]
     public string WorkspaceTypeString { get; set; } = "";
-    [JsonIgnore]
     public DetailsElement[] Details { get; set; } = [];
-    [JsonIgnore]
-    public int Frequency { get; set; } = 0;
+    public int Frequency { get; set; }
     public DateTime LastAccessed { get; set; }
     public VisualStudioCodeWorkspace() { }
     /// <summary>
@@ -39,24 +38,24 @@ public class VisualStudioCodeWorkspace
     /// <param name="path">The path to the workspace.</param>
     internal VisualStudioCodeWorkspace(VisualStudioCodeInstance instance, string path, WorkspaceType visualStudioCodeWorkspaceType, VisualStudioCodeWorkspaceSource source, string sourcePath)
     {
-        this.Path = path;
+        Path = path;
         if (FileUriParser.TryConvertToWindowsPath(path, out string? windowsPath) && windowsPath != null)
         {
-            this.WindowsPath = windowsPath;
+            WindowsPath = windowsPath;
         }
         else
         {
-            this.WindowsPath = path;
+            WindowsPath = path;
         }
-        this.Instance = instance;
-        this.WorkspaceType = visualStudioCodeWorkspaceType;
-        this.Source = source;
+        VSCodeInstance = instance;
+        WorkspaceType = visualStudioCodeWorkspaceType;
+        Source = source;
         SourcePath.Add(sourcePath);
 
         SetName();
-        SetVSType();
+        SetVSCodeType();
         SetWorkspaceType();
-        SetMetadata();
+        SetVSCodeMetadata();
         Name = WorkspaceName;
     }
 
@@ -95,7 +94,7 @@ public class VisualStudioCodeWorkspace
     /// Determines the type of the workspace (e.g., Local, WSL, Remote).
     /// </summary>
     /// <returns>The type of the workspace as a string.</returns>
-    public void SetVSType()
+    public void SetVSCodeType()
     {
         if (Path == null) return;
         if (Path.StartsWith("vscode-remote://wsl", System.StringComparison.OrdinalIgnoreCase))
@@ -122,6 +121,9 @@ public class VisualStudioCodeWorkspace
             case WorkspaceType.Folder:
                 WorkspaceTypeString = "Folder";
                 break;
+            case WorkspaceType.Solution:
+                WorkspaceTypeString = "Solution";
+                break;
             default:
                 WorkspaceTypeString = "Unknown Type";
                 break;
@@ -132,31 +134,77 @@ public class VisualStudioCodeWorkspace
     /// Gets the details of the workspace.
     /// </summary>
     /// <returns>An array of details elements containing information about the workspace.</returns>
-    public void SetMetadata()
+    public void SetVSCodeMetadata()
     {
-        if (Instance == null || Path == null) return;
+        if (Path == null) return;
         var typeTags = new List<Tag>() { new Tag(WorkspaceTypeString) };
         if (VSTypeString != "")
         {
             typeTags.Add(new Tag(VSTypeString));
         }
 
-        Details = new List<DetailsElement>(){
-            new DetailsElement()
+        var detailsElements = new List<DetailsElement>();
+
+        if (VSCodeInstance != null)
+        {
+            detailsElements.Add(new DetailsElement()
             {
                 Key = Resource.item_details_target,
-                Data = new DetailsTags() { Tags = new List<Tag>() { new Tag(Instance.Name) }.ToArray() }
-            },
-            new DetailsElement()
+                Data = new DetailsTags() { Tags = new List<Tag>() { new Tag(VSCodeInstance.Name) }.ToArray() }
+            });
+        }
+
+        detailsElements.Add(new DetailsElement()
+        {
+            Key = Resource.item_details_type,
+            Data = new DetailsTags() { Tags = typeTags.ToArray() }
+        });
+
+        detailsElements.Add(new DetailsElement()
+        {
+            Key = Resource.item_details_path,
+            Data = new DetailsLink() { Text = Uri.UnescapeDataString(Path) },
+        });
+
+        Details = detailsElements.ToArray();
+    }
+
+    /// <summary>
+    /// Gets the details of the workspace.
+    /// </summary>
+    /// <returns>An array of details elements containing information about the workspace.</returns>
+    public void SetVSMetadata()
+    {
+        if (Path == null) return;
+        var typeTags = new List<Tag>() { new Tag(WorkspaceTypeString) };
+        if (VSTypeString != "")
+        {
+            typeTags.Add(new Tag(VSTypeString));
+        }
+
+        var detailsElements = new List<DetailsElement>();
+
+        if (VSInstance != null)
+        {
+            detailsElements.Add(new DetailsElement()
             {
-                Key = Resource.item_details_type,
-                Data = new DetailsTags() { Tags = typeTags.ToArray() }
-            },
-            new DetailsElement()
-            {
-                Key = Resource.item_details_path,
-                Data = new DetailsLink() { Text = Uri.UnescapeDataString(Path) },
-            }
-        }.ToArray();
+                Key = Resource.item_details_target,
+                Data = new DetailsTags() { Tags = new List<Tag>() { new Tag(VSInstance.Name) }.ToArray() }
+            });
+        }
+
+        detailsElements.Add(new DetailsElement()
+        {
+            Key = Resource.item_details_type,
+            Data = new DetailsTags() { Tags = typeTags.ToArray() }
+        });
+
+        detailsElements.Add(new DetailsElement()
+        {
+            Key = Resource.item_details_path,
+            Data = new DetailsLink() { Text = Uri.UnescapeDataString(Path) },
+        });
+
+        Details = detailsElements.ToArray();
     }
 }

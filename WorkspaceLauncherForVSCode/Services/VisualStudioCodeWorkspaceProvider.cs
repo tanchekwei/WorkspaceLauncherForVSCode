@@ -1,3 +1,6 @@
+// Modifications copyright (c) 2025 tanchekwei 
+// Licensed under the MIT License. See the LICENSE file in the project root for details.
+
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -11,9 +14,11 @@ namespace WorkspaceLauncherForVSCode.Services
 {
     public static class VisualStudioCodeWorkspaceProvider
     {
-        public static async Task<IEnumerable<VisualStudioCodeWorkspace>> GetWorkspacesAsync(VisualStudioCodeInstance instance, WorkspaceStorage workspaceStorage, CancellationToken cancellationToken)
+        public static async Task<IEnumerable<VisualStudioCodeWorkspace>> GetWorkspacesAsync(VisualStudioCodeInstance instance, List<VisualStudioCodeWorkspace> dbWorkspaces, CancellationToken cancellationToken)
         {
-            // using var logger = new TimeLogger();
+#if DEBUG
+            using var logger = new TimeLogger();
+#endif
             if (cancellationToken.IsCancellationRequested || !File.Exists(instance.ExecutablePath))
             {
                 return Enumerable.Empty<VisualStudioCodeWorkspace>();
@@ -25,14 +30,13 @@ namespace WorkspaceLauncherForVSCode.Services
             await Task.WhenAll(vscdbTask, storageJsonTask);
 
             var allWorkspaces = new ConcurrentBag<VisualStudioCodeWorkspace>(vscdbTask.Result.Concat(storageJsonTask.Result));
-            var dbWorkspaces = await workspaceStorage.GetWorkspacesAsync();
-            foreach (var dbWorkspace in dbWorkspaces)
+            foreach (var workspace in dbWorkspaces)
             {
                 foreach (var vsCodeWorkspace in allWorkspaces)
                 {
-                    if (dbWorkspace.Path == vsCodeWorkspace.Path)
+                    if (workspace.Path == vsCodeWorkspace.Path)
                     {
-                        vsCodeWorkspace.Frequency = dbWorkspace.Frequency;
+                        vsCodeWorkspace.Frequency = workspace.Frequency;
                         break;
                     }
                 }

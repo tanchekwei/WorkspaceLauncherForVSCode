@@ -3,8 +3,8 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>WorkspaceLauncherForVSCode</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Product>Workspace Launcher for VS Code</Product>
-    <AssemblyTitle>Workspace Launcher for VS Code</AssemblyTitle>
+    <Product>Workspace Launcher for Visual Studio / Code</Product>
+    <AssemblyTitle>Workspace Launcher for Visual Studio / Code</AssemblyTitle>
     <!-- <WindowsPackageType>None</WindowsPackageType> -->
 
     <WindowsSdkPackageVersion>10.0.22621.57</WindowsSdkPackageVersion>
@@ -53,6 +53,16 @@
   <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <ProjectCapability Include="Msix" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <AssemblyName>WorkspaceLauncherForVSCodeDev</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>   
+    <AppxManifest Include="Package.appxmanifest" Condition="'$(Configuration)' == 'Release'" />
+    <AppxManifest Include="Package-Dev.appxmanifest" Condition="'$(Configuration)' == 'Debug'" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.CommandPalette.Extensions" />
     <PackageReference Include="Microsoft.Data.Sqlite" />

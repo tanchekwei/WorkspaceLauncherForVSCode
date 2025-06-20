@@ -1,0 +1,32 @@
+**Copyright and Notices**
+
+This software is made possible by the contributions of its developers and the open-source projects it is built upon.
+
+Copyright © 2025 tanchekwei
+
+The following copyrights are acknowledged for the respective components and adaptations included in this software:
+
+* Copyright © 2025 Jonah Fintz
+* Copyright © 2025 Davide Giacometti
+* Copyright © 2020 Betsegaw Tadele
+* Copyright © 2025 Microsoft Corporation
+
+---
+
+**Third-Party Acknowledgements**
+
+This extension adapts and combines functionality from the following open-source projects. I acknowledge and appreciate the availability of their work under open-source licenses:
+
+* CommandPaletteVSCode by Jonah Fintz
+  Source: [https://github.com/JonahFintzDev/CommandPaletteVSCode](https://github.com/JonahFintzDev/CommandPaletteVSCode)
+
+* PowerToys-Run-VisualStudio by Davide Giacometti
+  Source: [https://github.com/davidegiacometti/PowerToys-Run-VisualStudio](https://github.com/davidegiacometti/PowerToys-Run-VisualStudio)
+
+* VisualStudioExtension by Davide Giacometti
+  Source: [https://github.com/davidegiacometti/CmdPal-Extensions/tree/main/src/VisualStudioExtension](https://github.com/davidegiacometti/CmdPal-Extensions/tree/main/src/VisualStudioExtension)
+
+* Window Walker PowerToys Command Palette Extension, based on the original work by Betsegaw Tadele and integrated into the Microsoft PowerToys
+  Source: [https://github.com/microsoft/PowerToys/tree/main/src/modules/cmdpal/ext/Microsoft.CmdPal.Ext.WindowWalker](https://github.com/microsoft/PowerToys/tree/main/src/modules/cmdpal/ext/Microsoft.CmdPal.Ext.WindowWalker)
+
+All third-party components are used in accordance with their original licensing terms. Please visit the source repositories for more information.

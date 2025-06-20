@@ -1,3 +1,6 @@
+// Modifications copyright (c) 2025 tanchekwei 
+// Licensed under the MIT License. See the LICENSE file in the project root for details.
+
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -8,7 +11,7 @@ namespace WorkspaceLauncherForVSCode.Classes
 {
     internal static class Logger
     {
-        private static readonly string LogFilePath = Path.Combine(Utilities.BaseSettingsPath("WorkspaceLauncherForVSCode"), "main.log");
+        private static readonly string LogFilePath = Path.Combine(Utilities.BaseSettingsPath(Constant.AppName), "main.log");
         private static readonly object _lock = new object();
         private static readonly SettingsManager _settingsManager = new SettingsManager();
 

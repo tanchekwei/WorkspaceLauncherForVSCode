@@ -8,27 +8,13 @@ namespace WorkspaceLauncherForVSCode.Commands
 {
     internal static class CommandHelpers
     {
-        public static CommandResult? GetPathNotFoundResult(string path, VisualStudioCodeWorkspace? workspace, VisualStudioCodePage page)
+        public static CommandResult? IsPathNotFound(string path)
         {
             if (!Directory.Exists(path) && !File.Exists(path))
             {
-                if (workspace?.WorkspaceType == Enums.WorkspaceType.Solution)
-                {
-                    return CommandResult.ShowToast("Path does not exist");
-                }
-                else if (workspace != null)
-                {
-                    var confirmArgs = new ConfirmationArgs()
-                    {
-                        Title = $"Path does not exist, do you want to remove from list?",
-                        Description = $"{path}",
-                        PrimaryCommand = new RemoveWorkspaceCommandConfirmation(workspace, page),
-                        IsPrimaryCommandCritical = true,
-                    };
-                    return CommandResult.Confirm(confirmArgs);
-                }
+                new ToastStatusMessage($"Path does not exist").Show();
+                return CommandResult.KeepOpen();
             }
-
             return null;
         }
     }

@@ -1,4 +1,4 @@
-// Modifications copyright (c) 2025 tanchekwei 
+// Modifications copyright (c) 2025 tanchekwei
 // Licensed under the MIT License. See the LICENSE file in the project root for details.
 
 using System;
@@ -10,6 +10,7 @@ using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using WorkspaceLauncherForVSCode.Classes;
 using WorkspaceLauncherForVSCode.Commands;
+using WorkspaceLauncherForVSCode.Interfaces;
 using WorkspaceLauncherForVSCode.Listeners;
 using WorkspaceLauncherForVSCode.Properties;
 using WorkspaceLauncherForVSCode.Workspaces;
@@ -28,8 +29,7 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
     private List<ListItem> _cachedFilteredItems = new();
 
     private readonly object _itemsLock = new();
-    private readonly SemaphoreSlim _getItemsSemaphore = new(1, 1);
-    private readonly SemaphoreSlim _loadWorkspacesAsyncSemaphore = new(1, 1);
+    private readonly SemaphoreSlim _refreshSemaphore = new(1, 1);
 
     private CancellationTokenSource _cancellationTokenSource = new();
 
@@ -69,33 +69,13 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
             Title = "Still not seeing what you´re looking for?",
             Subtitle = "Double-click or press Enter to refresh the list.",
         }];
-        Task.Run(() => LoadInitialWorkspacesAsync());
+        _ = LoadInitialWorkspacesAsync();
     }
 
-    // private void SetIcon()
-    // {
-    //     if (_settingsManager.EnableVisualStudio)
-    //     {
-    //         const VisualStudioCodeEdition AnyEditionFlags =
-    //             VisualStudioCodeEdition.Default |
-    //             VisualStudioCodeEdition.System |
-    //             VisualStudioCodeEdition.Insider |
-    //             VisualStudioCodeEdition.Custom;
-    //
-    //         if ((_settingsManager.EnabledEditions & AnyEditionFlags) == 0)
-    //         {
-    //             this.Icon = Classes.Icon.VisualStudio;
-    //         }
-    //         else
-    //         {
-    //             this.Icon = Classes.Icon.VisualStudioAndVisualStudioCode;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         this.Icon = Classes.Icon.VisualStudioCode;
-    //     }
-    // }
+    public void StartRefresh()
+    {
+        _ = RefreshWorkspacesAsync(isUserInitiated: true);
+    }
 
     private async Task LoadInitialWorkspacesAsync()
     {
@@ -103,22 +83,16 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
         using var logger = new TimeLogger();
 #endif
         var workspaces = await _workspaceStorage.GetWorkspacesAsync();
-        if (workspaces.Count == 0)
-        {
-            await LoadWorkspacesAsync(workspaces, _cancellationTokenSource.Token);
-        }
-        else
+        if (workspaces.Count > 0)
         {
             UpdateWorkspaceList(workspaces, CancellationToken.None);
-            RaiseItemsChanged();
-            // Trigger a background update
-            _ = Task.Run(() => LoadWorkspacesAsync(workspaces, _cancellationTokenSource.Token));
         }
+
+        await RefreshWorkspacesAsync(isUserInitiated: false);
     }
 
     public override IListItem[] GetItems()
     {
-        _getItemsSemaphore.Wait();
         try
         {
 #if DEBUG
@@ -128,12 +102,7 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
             {
                 if (_allItems.Count == 0 && !IsLoading)
                 {
-                    // Load initial items in the background
-                    _ = Task.Run(async () =>
-                    {
-                        var workspaces = await _workspaceStorage.GetWorkspacesAsync();
-                        await LoadWorkspacesAsync(workspaces, _cancellationTokenSource.Token);
-                    });
+                    RefreshWorkspacesAsync(isUserInitiated: false).GetAwaiter().GetResult();
                 }
 
                 if (_visibleItems.Count == 0 && !IsLoading && !string.IsNullOrWhiteSpace(SearchText))
@@ -145,34 +114,36 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
         }
         finally
         {
-            _getItemsSemaphore.Release();
         }
     }
 
     public override void UpdateSearchText(string oldSearch, string newSearch)
     {
-        _cancellationTokenSource.Cancel();
-        _cancellationTokenSource = new CancellationTokenSource();
-        var cancellationToken = _cancellationTokenSource.Token;
-
-        if (cancellationToken.IsCancellationRequested)
+        if (oldSearch == newSearch)
+        {
             return;
-
+        }
+#if DEBUG
+        using var logger = new TimeLogger();
+        Logger.Log($"SearchText: {newSearch}");
+#endif
         lock (_itemsLock)
         {
-            _cachedFilteredItems = WorkspaceFilter.Filter(newSearch, _allItems, _settingsManager.SearchBy, _settingsManager.SortByFrequency);
+            _cachedFilteredItems = WorkspaceFilter.Filter(newSearch, _allItems, _settingsManager.SearchBy);
             _visibleItems.Clear();
             _visibleItems.AddRange(_cachedFilteredItems.Take(_settingsManager.PageSize));
             HasMoreItems = _cachedFilteredItems.Count > _settingsManager.PageSize;
         }
 
-        RaiseItemsChanged();
+        RaiseItemsChanged(_visibleItems.Count);
     }
 
     public override void LoadMore()
     {
+#if DEBUG
+        using var logger = new TimeLogger();
+#endif
         IsLoading = true;
-        RaiseItemsChanged();
 
         lock (_itemsLock)
         {
@@ -188,21 +159,31 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
         }
 
         IsLoading = false;
-        RaiseItemsChanged();
+        RaiseItemsChanged(_visibleItems.Count);
     }
 
-    private async Task LoadWorkspacesAsync(List<VisualStudioCodeWorkspace> dbWorkspaces, CancellationToken cancellationToken)
+    private async Task RefreshWorkspacesAsync(bool isUserInitiated)
     {
-        _loadWorkspacesAsyncSemaphore.Wait(cancellationToken);
-#if DEBUG
-        using var logger = new TimeLogger();
-#endif
-        IsLoading = true;
-        RaiseItemsChanged();
+        if (!_refreshSemaphore.Wait(0))
+        {
+            // Skip if a refresh is already in progress
+            return;
+        }
 
         try
         {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = _cancellationTokenSource.Token;
 
+            IsLoading = true;
+
+            if (isUserInitiated)
+            {
+                _vscodeService.LoadInstances(_settingsManager.EnabledEditions, _settingsManager.PreferredEdition);
+            }
+
+            var dbWorkspaces = await _workspaceStorage.GetWorkspacesAsync();
             var workspacesTask = _vscodeService.GetWorkspacesAsync(dbWorkspaces, cancellationToken);
             Task<List<VisualStudioCodeWorkspace>>? solutionsTask = null;
             if (_settingsManager.EnableVisualStudio)
@@ -210,12 +191,14 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
                 solutionsTask = _vscodeService.GetVisualStudioSolutions(dbWorkspaces, true);
             }
             await Task.WhenAll(workspacesTask, solutionsTask ?? Task.CompletedTask);
+
+            if (cancellationToken.IsCancellationRequested) return;
+
             var workspaces = await workspacesTask;
             var solutions = solutionsTask != null ? await solutionsTask : new List<VisualStudioCodeWorkspace>();
 
             workspaces.AddRange(solutions);
 
-            if (cancellationToken.IsCancellationRequested) return;
             await _workspaceStorage.SaveWorkspacesAsync(workspaces);
             UpdateWorkspaceList(workspaces, cancellationToken);
             new ToastStatusMessage($"Loaded {workspaces.Count} workspaces").Show();
@@ -226,12 +209,18 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
         }
         finally
         {
-            if (!cancellationToken.IsCancellationRequested)
+            if (!IsLoading)
+            {
+                // This can happen if the operation was cancelled very early.
+                // Ensure the semaphore is released regardless.
+                _refreshSemaphore.Release();
+            }
+
+            if (!_cancellationTokenSource.IsCancellationRequested)
             {
                 IsLoading = false;
-                RaiseItemsChanged();
             }
-            _loadWorkspacesAsyncSemaphore.Release();
+            _refreshSemaphore.Release();
         }
     }
 
@@ -241,7 +230,7 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
         using var logger = new TimeLogger();
 #endif
         var newItems = workspaces
-            .Select(w => WorkspaceItemFactory.Create(w, this, _settingsManager, _refreshWorkspacesCommandContextItem, _openExtensionSettingsLogsCommandContextItem))
+            .Select(w => WorkspaceItemFactory.Create(w, this, _workspaceStorage, _settingsManager, _refreshWorkspacesCommandContextItem, _openExtensionSettingsLogsCommandContextItem))
             .ToList();
 
         lock (_itemsLock)
@@ -252,43 +241,45 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
             _allItems.AddRange(newItems);
 
             // Apply the current filter to the newly loaded items
-            _cachedFilteredItems = WorkspaceFilter.Filter(SearchText, _allItems, _settingsManager.SearchBy, _settingsManager.SortByFrequency);
+            _cachedFilteredItems = WorkspaceFilter.Filter(SearchText, _allItems, _settingsManager.SearchBy);
             _visibleItems.Clear();
             _visibleItems.AddRange(_cachedFilteredItems.Take(_settingsManager.PageSize));
             HasMoreItems = _cachedFilteredItems.Count > _settingsManager.PageSize;
         }
+        RaiseItemsChanged(_visibleItems.Count);
     }
 
     private void OnPageSettingsChanged(object? sender, EventArgs e)
     {
         ShowDetails = _settingsManager.ShowDetails;
-
-        lock (_itemsLock)
-        {
-            _cachedFilteredItems = WorkspaceFilter.Filter(SearchText, _allItems, _settingsManager.SearchBy, _settingsManager.SortByFrequency);
-            _visibleItems.Clear();
-            _visibleItems.AddRange(_cachedFilteredItems.Take(_settingsManager.PageSize));
-            HasMoreItems = _cachedFilteredItems.Count > _settingsManager.PageSize;
-        }
-
-        RaiseItemsChanged();
+        UpdateSearchText(SearchText, SearchText);
     }
 
-    public void RemoveWorkspace(VisualStudioCodeWorkspace workspace)
+    public Task TogglePinStatus(string path)
     {
         lock (_itemsLock)
         {
-            var itemToRemove = _allItems.FirstOrDefault(item => (item.Command as OpenVisualStudioCodeCommand)?.Workspace == workspace);
-            if (itemToRemove != null)
+            var itemToUpdate = _allItems.FirstOrDefault(item => (item.Command as IHasWorkspace)?.Workspace?.Path == path);
+            if (itemToUpdate != null)
             {
-                _allItems.Remove(itemToRemove);
-                _cachedFilteredItems.Remove(itemToRemove);
-                _visibleItems.Remove(itemToRemove);
-                HasMoreItems = _cachedFilteredItems.Count > _visibleItems.Count;
+                var workspace = (itemToUpdate.Command as IHasWorkspace)?.Workspace;
+                if (workspace != null)
+                {
+                    workspace.PinDateTime = workspace.PinDateTime.HasValue ? null : DateTime.UtcNow;
+                    if (_allItems.Remove(itemToUpdate))
+                    {
+                        _allItems.Add(WorkspaceItemFactory.Create(workspace, this, _workspaceStorage, _settingsManager, _refreshWorkspacesCommandContextItem, _openExtensionSettingsLogsCommandContextItem));
+                    }
+
+                    _cachedFilteredItems = WorkspaceFilter.Filter(SearchText, _allItems, _settingsManager.SearchBy);
+                    _visibleItems.Clear();
+                    _visibleItems.AddRange(_cachedFilteredItems.Take(_settingsManager.PageSize));
+                    HasMoreItems = _cachedFilteredItems.Count > _settingsManager.PageSize;
+                }
             }
         }
-
-        RaiseItemsChanged();
+        RaiseItemsChanged(_visibleItems.Count);
+        return Task.CompletedTask;
     }
 
     public async Task UpdateFrequencyAsync(string path)
@@ -297,7 +288,7 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
 
         lock (_itemsLock)
         {
-            var itemToUpdate = _allItems.FirstOrDefault(item => (item.Command as IHasWorkspace)?.Workspace.Path == path);
+            var itemToUpdate = _allItems.FirstOrDefault(item => (item.Command as IHasWorkspace)?.Workspace?.Path == path);
             if (itemToUpdate != null)
             {
                 var openCommand = itemToUpdate.Command as IHasWorkspace;
@@ -307,13 +298,12 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
                 }
 
                 // Re-apply filter and sort
-                _cachedFilteredItems = WorkspaceFilter.Filter(SearchText, _allItems, _settingsManager.SearchBy, _settingsManager.SortByFrequency);
+                _cachedFilteredItems = WorkspaceFilter.Filter(SearchText, _allItems, _settingsManager.SearchBy);
                 _visibleItems.Clear();
                 _visibleItems.AddRange(_cachedFilteredItems.Take(_settingsManager.PageSize));
                 HasMoreItems = _cachedFilteredItems.Count > _settingsManager.PageSize;
             }
         }
-        RaiseItemsChanged();
     }
 
     public void ClearAllItems()
@@ -327,6 +317,6 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
         _cancellationTokenSource.Dispose();
         _settingsListener.PageSettingsChanged -= OnPageSettingsChanged;
         _workspaceStorage.Dispose();
-        _getItemsSemaphore.Dispose();
+        _refreshSemaphore.Dispose();
     }
 }

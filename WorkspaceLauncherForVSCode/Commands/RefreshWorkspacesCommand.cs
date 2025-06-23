@@ -22,15 +22,7 @@ public sealed partial class RefreshWorkspacesCommand : InvokableCommand
 
     public override CommandResult Invoke()
     {
-        try
-        {
-            _visualStudioCodeService.LoadInstances(_settingsManager.EnabledEditions, _settingsManager.PreferredEdition);
-            _visualStudioCodePage.ClearAllItems();
-            _visualStudioCodePage.UpdateSearchText(_visualStudioCodePage.SearchText, "");
-        }
-        catch
-        {
-        }
+        _visualStudioCodePage.StartRefresh();
         return CommandResult.KeepOpen();
     }
 }

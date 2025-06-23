@@ -37,6 +37,7 @@ namespace WorkspaceLauncherForVSCode.Services
                     if (workspace.Path == vs.Path)
                     {
                         vs.Frequency = workspace.Frequency;
+                        vs.PinDateTime = workspace.PinDateTime;
                         break;
                     }
                 }

@@ -1,10 +1,11 @@
-// Modifications copyright (c) 2025 tanchekwei 
+// Modifications copyright (c) 2025 tanchekwei
 // Licensed under the MIT License. See the LICENSE file in the project root for details.
 
 using System;
 using System.Collections.Generic;
 using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
+using WorkspaceLauncherForVSCode.Classes;
 using WorkspaceLauncherForVSCode.Commands;
 using WorkspaceLauncherForVSCode.Enums;
 
@@ -12,13 +13,24 @@ namespace WorkspaceLauncherForVSCode.Workspaces
 {
     public static class WorkspaceItemFactory
     {
-        public static ListItem Create(VisualStudioCodeWorkspace workspace, VisualStudioCodePage page, SettingsManager settingsManager, CommandContextItem refreshCommandContextItem, CommandContextItem openExtensionSettingsLogsCommandContextItem)
+        public static readonly Tag PinTag = new Tag();
+        static WorkspaceItemFactory()
+        {
+            PinTag.Icon = Icon.Pinned;
+        }
+
+        public static ListItem Create(
+            VisualStudioCodeWorkspace workspace,
+            VisualStudioCodePage page,
+            WorkspaceStorage workspaceStorage,
+            SettingsManager settingsManager,
+            CommandContextItem refreshCommandContextItem,
+            CommandContextItem openExtensionSettingsLogsCommandContextItem)
         {
             ICommand command;
             IconInfo icon;
             Details details;
             var tags = new List<Tag>();
-            IContextItem[] moreCommands;
 
             switch (workspace.WorkspaceType)
             {
@@ -39,14 +51,6 @@ namespace WorkspaceLauncherForVSCode.Workspaces
                             tags.Add(new Tag(name));
                         }
                     }
-                    moreCommands = [
-                        new CommandContextItem(new OpenInExplorerCommand(workspace.WindowsPath ?? string.Empty, workspace, page)),
-                        new CommandContextItem(new CopyPathCommand(workspace.WindowsPath ?? string.Empty)),
-                        refreshCommandContextItem,
-#if DEBUG
-                        openExtensionSettingsLogsCommandContextItem,
-#endif
-                    ];
                     break;
                 default:
                     command = new OpenVisualStudioCodeCommand(workspace, page, settingsManager.CommandResult);
@@ -72,16 +76,6 @@ namespace WorkspaceLauncherForVSCode.Workspaces
                             tags.Add(new Tag(name));
                         }
                     }
-                    moreCommands = [
-                        new CommandContextItem(new OpenInExplorerCommand(workspace.WindowsPath ?? string.Empty, workspace, page)),
-                        new CommandContextItem(new CopyPathCommand(workspace.WindowsPath ?? string.Empty)),
-                        new CommandContextItem(new RemoveWorkspaceCommandConfirmation(workspace, page)),
-                        refreshCommandContextItem,
-#if DEBUG
-                        openExtensionSettingsLogsCommandContextItem,
-#endif
-
-                    ];
                     break;
             }
 
@@ -92,7 +86,16 @@ namespace WorkspaceLauncherForVSCode.Workspaces
                 Details = details,
                 Icon = icon,
                 Tags = tags.ToArray(),
-                MoreCommands = moreCommands
+                MoreCommands =
+                [
+                    new CommandContextItem(new OpenInExplorerCommand(workspace.WindowsPath ?? string.Empty, workspace, page)),
+                    new CommandContextItem(new PinWorkspaceCommand(workspace, page, workspaceStorage)),
+                    new CommandContextItem(new CopyPathCommand(workspace.WindowsPath ?? string.Empty)),
+                    refreshCommandContextItem,
+#if DEBUG
+                    openExtensionSettingsLogsCommandContextItem,
+#endif
+                ]
             };
             return item;
         }

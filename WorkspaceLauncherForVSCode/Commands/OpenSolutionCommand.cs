@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using WorkspaceLauncherForVSCode.Components;
+using WorkspaceLauncherForVSCode.Interfaces;
 
 namespace WorkspaceLauncherForVSCode.Commands
 {
@@ -26,7 +27,7 @@ namespace WorkspaceLauncherForVSCode.Commands
         {
             if (Workspace.WindowsPath is not null)
             {
-                var pathNotFoundResult = CommandHelpers.GetPathNotFoundResult(Workspace.WindowsPath, Workspace, _page);
+                var pathNotFoundResult = CommandHelpers.IsPathNotFound(Workspace.WindowsPath);
                 if (pathNotFoundResult != null)
                 {
                     return pathNotFoundResult;

@@ -1,4 +1,4 @@
-// Modifications copyright (c) 2025 tanchekwei 
+// Modifications copyright (c) 2025 tanchekwei
 // Licensed under the MIT License. See the LICENSE file in the project root for details.
 
 using System;
@@ -26,15 +26,32 @@ namespace WorkspaceLauncherForVSCode.Classes
                     Type INTEGER,
                     Frequency INTEGER DEFAULT 0,
                     LastAccessed TEXT
+                );
+                CREATE TABLE IF NOT EXISTS PinnedWorkspaces (
+                    Path TEXT PRIMARY KEY,
+                    PinDateTime TEXT NOT NULL
                 );";
 
-            public const string GetWorkspaces = "SELECT Path, Name, Type, Frequency, LastAccessed FROM Workspaces";
+            public const string GetWorkspaces = @"SELECT 
+    w.Path, 
+    w.Name, 
+    w.Type, 
+    w.Frequency, 
+    w.LastAccessed, 
+    p.PinDateTime
+FROM Workspaces w
+LEFT JOIN PinnedWorkspaces p ON w.Path = p.Path;
+";
 
             public const string SaveWorkspace = @"
                 INSERT OR REPLACE INTO Workspaces (Path, Name, Type, Frequency, LastAccessed)
                 VALUES (@Path, @Name, @Type, COALESCE((SELECT Frequency FROM Workspaces WHERE Path = @Path), 0), @LastAccessed)";
 
             public const string UpdateFrequency = "UPDATE Workspaces SET Frequency = Frequency + 1, LastAccessed = @LastAccessed WHERE Path = @path";
+
+            public const string GetPinnedWorkspaces = "SELECT Path, PinDateTime FROM PinnedWorkspaces";
+            public const string AddPinnedWorkspace = "INSERT OR REPLACE INTO PinnedWorkspaces (Path, PinDateTime) VALUES (@Path, @PinDateTime)";
+            public const string RemovePinnedWorkspace = "DELETE FROM PinnedWorkspaces WHERE Path = @Path";
         }
 
         public WorkspaceStorage()
@@ -66,7 +83,8 @@ namespace WorkspaceLauncherForVSCode.Classes
                     Name = reader.IsDBNull(1) ? null : reader.GetString(1),
                     WorkspaceType = (Enums.WorkspaceType)reader.GetInt32(2),
                     Frequency = reader.GetInt32(3),
-                    LastAccessed = reader.IsDBNull(4) ? DateTime.MinValue : DateTime.Parse(reader.GetString(4), CultureInfo.InvariantCulture)
+                    LastAccessed = reader.IsDBNull(4) ? DateTime.MinValue : DateTime.Parse(reader.GetString(4), CultureInfo.InvariantCulture),
+                    PinDateTime = reader.IsDBNull(5) ? null : DateTime.Parse(reader.GetString(5), CultureInfo.InvariantCulture),
                 });
             }
             return workspaces;
@@ -118,6 +136,23 @@ namespace WorkspaceLauncherForVSCode.Classes
             command.CommandText = Queries.UpdateFrequency;
             command.Parameters.AddWithValue("@path", path);
             command.Parameters.AddWithValue("@LastAccessed", DateTime.Now.ToString("o"));
+            await command.ExecuteNonQueryAsync();
+        }
+
+        public async Task AddPinnedWorkspaceAsync(string path)
+        {
+            using var command = _connection.CreateCommand();
+            command.CommandText = Queries.AddPinnedWorkspace;
+            command.Parameters.AddWithValue("@Path", path);
+            command.Parameters.AddWithValue("@PinDateTime", DateTime.UtcNow.ToString("o"));
+            await command.ExecuteNonQueryAsync();
+        }
+
+        public async Task RemovePinnedWorkspaceAsync(string path)
+        {
+            using var command = _connection.CreateCommand();
+            command.CommandText = Queries.RemovePinnedWorkspace;
+            command.Parameters.AddWithValue("@Path", path);
             await command.ExecuteNonQueryAsync();
         }
 

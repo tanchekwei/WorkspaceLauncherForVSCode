@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using WorkspaceLauncherForVSCode.Commands;
 using WorkspaceLauncherForVSCode.Enums;
+using WorkspaceLauncherForVSCode.Interfaces;
 
 namespace WorkspaceLauncherForVSCode;
 
@@ -55,7 +56,7 @@ internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand, IH
             return CommandResult.Confirm(new ConfirmationArgs { Title = "Error", Description = "Workspace path, or instance is null. Cannot open." });
         }
 
-        var pathNotFoundResult = CommandHelpers.GetPathNotFoundResult(Workspace.WindowsPath, Workspace, page);
+        var pathNotFoundResult = CommandHelpers.IsPathNotFound(Workspace.WindowsPath);
         if (pathNotFoundResult != null)
         {
             return pathNotFoundResult;
@@ -87,6 +88,9 @@ internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand, IH
                 page.SearchText = "";
                 return CommandResult.KeepOpen();
             case CommandResultType.Dismiss:
+                page.UpdateSearchText(page.SearchText, "");
+                page.SearchText = "";
+                return CommandResult.Dismiss();
             default:
                 return CommandResult.Dismiss();
         }

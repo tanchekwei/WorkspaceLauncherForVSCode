@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.CommandPalette.Extensions.Toolkit;
+using WorkspaceLauncherForVSCode.Classes;
 using WorkspaceLauncherForVSCode.Enums;
 using WorkspaceLauncherForVSCode.Properties;
 
@@ -35,11 +36,6 @@ public class SettingsManager : JsonSettingsManager
         new ChoiceSetSetting.Choice("Path", nameof(SearchBy.Path)),
         new ChoiceSetSetting.Choice("Both", nameof(SearchBy.Both)),
     ];
-    private readonly ToggleSetting _sortByFrequency = new(
-        Namespaced(nameof(SortByFrequency)),
-        "Sort by frequency",
-        "Sort workspaces by frequency of use.",
-        true);
 
     private readonly ToggleSetting _enableLogging = new(
         Namespaced(nameof(EnableLogging)),
@@ -117,9 +113,8 @@ public class SettingsManager : JsonSettingsManager
         Namespaced(nameof(PageSize)),
         Resource.setting_pageSize_label,
         Resource.setting_pageSize_desc,
-        "10");
+        "8");
 
-    public bool SortByFrequency => _sortByFrequency.Value;
     public bool EnableLogging => _enableLogging.Value;
     public bool ShowDetails => _showDetails.Value;
     public string PreferredEdition => _preferredEdition.Value ?? "Default";
@@ -192,13 +187,13 @@ public class SettingsManager : JsonSettingsManager
             {
                 return size;
             }
-            return 10;
+            return 8;
         }
     }
 
     internal static string SettingsJsonPath()
     {
-        var directory = Utilities.BaseSettingsPath("Microsoft.CmdPal");
+        var directory = Utilities.BaseSettingsPath(Constant.AppName);
         Directory.CreateDirectory(directory);
         return Path.Combine(directory, "settings.json");
     }
@@ -208,7 +203,6 @@ public class SettingsManager : JsonSettingsManager
         FilePath = SettingsJsonPath();
 
         Settings.Add(_showDetails);
-        Settings.Add(_sortByFrequency);
         Settings.Add(_showTypeTag);
         Settings.Add(_showTargetTag);
         Settings.Add(_enableVisualStudio);

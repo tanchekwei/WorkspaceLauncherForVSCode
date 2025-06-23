@@ -12,4 +12,6 @@ public static class Icon
     public static readonly IconInfo VisualStudioAndVisualStudioCode = IconHelpers.FromRelativePath("Assets\\VisualStudioAndVisualStudioCodeIcon.svg");
     public static readonly IconInfo VisualStudioCodeInsider = IconHelpers.FromRelativePath("Assets\\VisualStudioCodeInsiderIcon.svg");
     public static readonly IconInfo FileExplorer = IconHelpers.FromRelativePath("Assets\\FileExplorer.svg");
+    public static readonly IconInfo Pinned = new IconInfo("\ue718");
+    public static readonly IconInfo Unpinned = new IconInfo("\ue77a");
 }

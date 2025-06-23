@@ -7,15 +7,12 @@ This project provides a command palette extension for opening Visual Studio solu
 ![Workspace Launcher for Visual Studio / Code](./Assets/screenshot1.png)
 
 ## Features
-
+- **Optimized for Performance**: Designed to remain fast and responsive, with a configurable page size. By default, it displays 8 items per page to ensure smooth interaction even with large project histories.
 - **Unified Launcher**: Launch both Visual Studio solutions and Visual Studio Code workspaces from a single, convenient interface.
 - **Window-Switching**: If a Visual Studio solution is already open, the extension will switch to the existing window instead of opening a new instance.
-- **Workspace Management**: Retrieve and display a list of available workspaces, including their paths and types (e.g., Local, WSL, Remote).
-- **Command Execution**: Open solutions in Visual Studio and workspaces in Visual Studio Code using dedicated commands.
-- **Multi-Installation Support**: Works for multiple installations of Visual Studio and Visual Studio Code, including Insider and system installations.
 - **Secondary Actions**: Access additional commands for each entry:
     - **Copy Path**: Copies the full file path of the solution, workspace, or folder to the clipboard.
-    - **Remove from List**: Removes the workspace entry from Visual Studio Code's list of recently opened projects (not available for Visual Studio solutions).
+    - **Pin to List / Unpin from List**: Pins or unpins a workspace to keep it at the top of the list.
     - **Open in Explorer**: Opens the solution, workspace, or folder location in the default file explorer.
     - **Refresh Workspaces**: Manually reloads the list of solutions and workspaces to reflect any recent changes.
 
@@ -59,14 +56,13 @@ Suggested usage to replace PowerToys Run with this extension:
 
 ## Settings
 
-- **Preferred Edition**: Determines which edition (Default or Insider) is used when a folder or workspace has been opened in both editions of Visual Studio Code.
 - **Search By**: Choose what to search by (Path, Title, or Both).
-- **Use Strict Search**: Enables or disables strict search for workspaces.
 - **Page Size**: Sets the number of items to load and display at one time.
 - **Show Details Panel**: Toggles the visibility of the details panel.
 - **Tags**: Configures the tags displayed for each workspace (Type, Target, or both).
 - **Enable Visual Studio Code Installations**: Toggles which installations of Visual Studio Code to search for workspaces.
 - **Command Result Action**: Determines what should happen after opening a Visual Studio Code workspace.
+- **Preferred Edition**: Determines which edition (Default or Insider) is used when a folder or workspace has been opened in both editions of Visual Studio Code.
 
 ## How It Works
 

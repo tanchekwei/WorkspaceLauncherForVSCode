@@ -22,7 +22,6 @@ namespace WorkspaceLauncherForVSCode.Services.VisualStudio.Models
             Name = Path.GetFileName(codeContainer.Value.LocalProperties.FullPath);
             FullPath = codeContainer.Value.LocalProperties.FullPath;
             IsFavorite = codeContainer.Value.IsFavorite;
-            LastAccessed = codeContainer.Value.LastAccessed;
             Instance = instance;
         }
     }

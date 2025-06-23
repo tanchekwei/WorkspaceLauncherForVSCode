@@ -30,7 +30,7 @@ namespace WorkspaceLauncherForVSCode.Commands
             {
                 return CommandResult.Dismiss();
             }
-            var pathNotFoundResult = CommandHelpers.GetPathNotFoundResult(_arguments, workspace, page);
+            var pathNotFoundResult = CommandHelpers.IsPathNotFound(_arguments);
             if (pathNotFoundResult != null)
             {
                 return pathNotFoundResult;

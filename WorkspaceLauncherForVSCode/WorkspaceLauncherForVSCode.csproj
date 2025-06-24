@@ -3,8 +3,8 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>WorkspaceLauncherForVSCode</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Product>Workspace Launcher for Visual Studio / Code</Product>
-    <AssemblyTitle>Workspace Launcher for Visual Studio / Code</AssemblyTitle>
+    <Product>Visual Studio / Code for Command Palette</Product>
+    <AssemblyTitle>Visual Studio / Code for Command Palette</AssemblyTitle>
     <!-- <WindowsPackageType>None</WindowsPackageType> -->
 
     <WindowsSdkPackageVersion>10.0.22621.57</WindowsSdkPackageVersion>

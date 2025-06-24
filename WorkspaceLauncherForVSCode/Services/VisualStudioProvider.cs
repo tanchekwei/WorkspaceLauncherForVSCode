@@ -1,10 +1,10 @@
 // Modifications copyright (c) 2025 tanchekwei 
 // Licensed under the MIT License. See the LICENSE file in the project root for details.
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WorkspaceLauncherForVSCode.Classes;
 using WorkspaceLauncherForVSCode.Enums;
 using WorkspaceLauncherForVSCode.Services.VisualStudio;
 
@@ -15,6 +15,9 @@ namespace WorkspaceLauncherForVSCode.Services
         public static Task<List<VisualStudioCodeWorkspace>> GetSolutions(
             List<VisualStudioCodeWorkspace> dbWorkspaces, bool showPrerelease)
         {
+#if DEBUG
+            using var logger = new TimeLogger();
+#endif
             var visualStudioService = new VisualStudioService();
             visualStudioService.InitInstances(Array.Empty<string>());
             var results = visualStudioService.GetResults(showPrerelease);

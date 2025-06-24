@@ -1,6 +1,5 @@
 // Modifications copyright (c) 2025 tanchekwei
 // Licensed under the MIT License. See the LICENSE file in the project root for details.
-
 using System;
 using System.Collections.Generic;
 using Microsoft.CommandPalette.Extensions;
@@ -27,6 +26,9 @@ namespace WorkspaceLauncherForVSCode.Workspaces
             CommandContextItem refreshCommandContextItem,
             CommandContextItem openExtensionSettingsLogsCommandContextItem)
         {
+#if DEBUG
+            using var logger = new TimeLogger();
+#endif
             ICommand command;
             IconInfo icon;
             Details details;

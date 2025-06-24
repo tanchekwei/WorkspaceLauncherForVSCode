@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using WorkspaceLauncherForVSCode.Classes;
 using WorkspaceLauncherForVSCode.Services.VisualStudio.Models.Json;
 
 using VsCodeModels = WorkspaceLauncherForVSCode.Services.VisualStudio.Models;
@@ -30,6 +31,9 @@ namespace WorkspaceLauncherForVSCode.Services.VisualStudio
 
         public void InitInstances(string[] excludedVersions)
         {
+#if DEBUG
+            using var logger = new TimeLogger();
+#endif
             var paths = new string?[] { null, VsWhereDir };
             var exceptions = new List<(string? Path, Exception Exception)>(paths.Length);
             _instances.Clear();

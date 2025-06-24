@@ -3,6 +3,7 @@ using System;
 using System.Resources;
 using System.Threading;
 using Microsoft.CommandPalette.Extensions;
+using WorkspaceLauncherForVSCode.Classes;
 
 [assembly: NeutralResourcesLanguage("en-US")]
 
@@ -13,6 +14,9 @@ public class Program
     [MTAThread]
     public static void Main(string[] args)
     {
+#if DEBUG
+        using var logger = new TimeLogger();
+#endif
         if (args.Length > 0 && args[0] == "-RegisterProcessAsComServer")
         {
             using ExtensionServer server = new();

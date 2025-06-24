@@ -1,9 +1,9 @@
 // Modifications copyright (c) 2025 tanchekwei 
 // Licensed under the MIT License. See the LICENSE file in the project root for details.
-
 using System;
 using System.Collections.Generic;
 using System.IO;
+using WorkspaceLauncherForVSCode.Classes;
 using WorkspaceLauncherForVSCode.Enums;
 
 namespace WorkspaceLauncherForVSCode.Services
@@ -12,6 +12,9 @@ namespace WorkspaceLauncherForVSCode.Services
     {
         public static List<VisualStudioCodeInstance> GetInstances(VisualStudioCodeEdition enabledEditions, string preferredEdition)
         {
+#if DEBUG
+            using var logger = new TimeLogger();
+#endif
             var instances = new List<VisualStudioCodeInstance>();
             LoadInstances(enabledEditions, instances);
             SortInstances(instances, preferredEdition);
@@ -20,6 +23,9 @@ namespace WorkspaceLauncherForVSCode.Services
 
         private static void LoadInstances(VisualStudioCodeEdition enabledEditions, List<VisualStudioCodeInstance> instances)
         {
+#if DEBUG
+            using var logger = new TimeLogger();
+#endif
             var appdataProgramFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var programsFolderPathBase = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
             var defaultStoragePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Code", "User", "globalStorage");

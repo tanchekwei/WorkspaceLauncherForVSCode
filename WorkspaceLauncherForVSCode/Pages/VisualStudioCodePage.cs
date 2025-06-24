@@ -1,6 +1,5 @@
 // Modifications copyright (c) 2025 tanchekwei
 // Licensed under the MIT License. See the LICENSE file in the project root for details.
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -169,6 +168,9 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
             // Skip if a refresh is already in progress
             return;
         }
+#if DEBUG
+        using var logger = new TimeLogger();
+#endif
 
         try
         {
@@ -284,6 +286,10 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
 
     public async Task UpdateFrequencyAsync(string path)
     {
+#if DEBUG
+        using var logger = new TimeLogger();
+#endif
+
         await _workspaceStorage.UpdateWorkspaceFrequencyAsync(path);
 
         lock (_itemsLock)

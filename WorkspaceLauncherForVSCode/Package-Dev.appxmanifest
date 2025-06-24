@@ -12,10 +12,10 @@
 	<Identity
 	  Name="15722UsefulApp.WorkspaceLauncherforVSCode.Dev"
 	  Publisher="CN=BF18CC4F-2F9D-43F9-9BF7-0E949EE3057D"
-	  Version="1.9.0.0" />
+	  Version="1.10.0.0" />
 	
 	<Properties>
-    <DisplayName>Workspace Launcher for Visual Studio / Code (Dev)</DisplayName>
+    <DisplayName>Visual Studio / Code for Command Palette (Dev)</DisplayName>
     <PublisherDisplayName>UsefulApp</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties> 
@@ -34,8 +34,8 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="Workspace Launcher for Visual Studio / Code (Dev)"
-        Description="Workspace Launcher for Visual Studio / Code (Dev)"
+        DisplayName="Visual Studio / Code for Command Palette (Dev)"
+        Description="Visual Studio / Code for Command Palette (Dev)"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">
@@ -45,8 +45,8 @@
       <Extensions>
         <com:Extension Category="windows.comServer">
           <com:ComServer>
-            <com:ExeServer Executable="WorkspaceLauncherForVSCodeDev.exe" Arguments="-RegisterProcessAsComServer" DisplayName="Workspace Launcher for Visual Studio / Code (Dev)">
-              <com:Class Id="4c23de8f-6bdd-41a1-92f0-744d7af84659" DisplayName="Workspace Launcher for Visual Studio / Code (Dev)" />
+            <com:ExeServer Executable="WorkspaceLauncherForVSCodeDev.exe" Arguments="-RegisterProcessAsComServer" DisplayName="Visual Studio / Code for Command Palette (Dev)">
+              <com:Class Id="4c23de8f-6bdd-41a1-92f0-744d7af84659" DisplayName="Visual Studio / Code for Command Palette (Dev)" />
             </com:ExeServer>
           </com:ComServer>
         </com:Extension>
@@ -54,8 +54,8 @@
           <uap3:AppExtension Name="com.microsoft.commandpalette"
             Id="ID"
             PublicFolder="Public"
-            DisplayName="Workspace Launcher for Visual Studio / Code (Dev)"
-            Description="Workspace Launcher for Visual Studio / Code (Dev)">
+            DisplayName="Visual Studio / Code for Command Palette (Dev)"
+            Description="Visual Studio / Code for Command Palette (Dev)">
             <uap3:Properties>
               <CmdPalProvider>
                 <Activation>

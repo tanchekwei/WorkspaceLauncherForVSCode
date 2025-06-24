@@ -1,10 +1,10 @@
-# Workspace Launcher for Visual Studio / Code
+# Visual Studio / Code for Command Palette
 
 ## Overview
 
 This project provides a command palette extension for opening Visual Studio solutions and Visual Studio Code workspaces from a single, unified interface.
 
-![Workspace Launcher for Visual Studio / Code](./Assets/screenshot1.png)
+![Visual Studio / Code for Command Palette](./Assets/screenshot1.png)
 
 ## Features
 - **Optimized for Performance**: Designed to remain fast and responsive, with a configurable page size. By default, it displays 8 items per page to ensure smooth interaction even with large project histories.
@@ -30,7 +30,7 @@ This project provides a command palette extension for opening Visual Studio solu
 ### Via Command Palette
 
 1. Open Command Palette
-2. Select "Workspace Launcher for Visual Studio / Code"
+2. Select "Visual Studio / Code for Command Palette"
 
 ### Via Winget
 
@@ -44,14 +44,6 @@ This project provides a command palette extension for opening Visual Studio solu
 
 1. Make sure you use the latest version of PowerToys.
 2. Install the application by double-clicking the `.msix` file.
-
-## Replacing PowerToys Run
-Suggested usage to replace PowerToys Run with this extension:
-
-1. Open the Command Palette settings > Extensions > Workspace Launcher for Visual Studio / Code.
-2. Assign **Alt + Space** as the global hotkey (requires disabling PowerToys Run) or assign `{` as an alias with Direct toggled.
-
-![Replacing PowerToys Run](./Assets/screenshot2.png)
 
 ## Settings
 

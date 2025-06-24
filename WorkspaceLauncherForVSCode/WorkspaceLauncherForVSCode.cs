@@ -1,10 +1,10 @@
 // Modifications copyright (c) 2025 tanchekwei 
 // Licensed under the MIT License. See the LICENSE file in the project root for details.
-
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.CommandPalette.Extensions;
+using WorkspaceLauncherForVSCode.Classes;
 
 namespace WorkspaceLauncherForVSCode;
 
@@ -26,6 +26,9 @@ public sealed partial class WorkspaceLauncherForVSCode : IExtension, IDisposable
 
     public object? GetProvider(ProviderType providerType)
     {
+#if DEBUG
+        using var logger = new TimeLogger();
+#endif
         return providerType switch
         {
             ProviderType.Commands => _provider,

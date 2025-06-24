@@ -32,14 +32,13 @@ This project provides a command palette extension for opening Visual Studio solu
 1. Open Command Palette
 2. Select "Workspace Launcher for Visual Studio / Code"
 
-<!-- ### Via Winget
+### Via Winget
 
 1. Open Command Prompt or PowerShell
 2. Run the following command:
    ```bash
    winget install 15722UsefulApp.WorkspaceLauncherForVSCode
    ```
--->
 
 ### Manual Installation
 

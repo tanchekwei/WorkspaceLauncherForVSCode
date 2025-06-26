@@ -1,0 +1,30 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark gray rounded background -->
+  <rect x="0" y="0" width="100" height="100" rx="16" ry="16" fill="#202122" />
+
+  <!-- Colored vertical bars -->
+  <g transform="translate(10, 17)">
+    <rect x="0" y="0" width="10" height="10" rx="2" ry="2" fill="#3794ff" />
+    <rect x="0" y="18" width="10" height="10" rx="2" ry="2" fill="#a074c4" />
+    <rect x="0" y="36" width="10" height="10" rx="2" ry="2" fill="#3794ff" />
+    <rect x="0" y="54" width="10" height="10" rx="2" ry="2" fill="#a074c4" />
+  </g>
+
+  <!-- Text lines -->
+  <g transform="translate(25, 19)">
+    <rect x="0" y="0" width="65" height="7" rx="2" ry="2" fill="#e0e0e0" />
+    <rect x="0" y="18" width="65" height="7" rx="2" ry="2" fill="#e0e0e0" />
+    <rect x="0" y="36" width="65" height="7" rx="2" ry="2" fill="#e0e0e0" />
+    <rect x="0" y="54" width="65" height="7" rx="2" ry="2" fill="#e0e0e0" />
+  </g>
+
+  <!-- Enhanced magnifier icon -->
+  <g transform="translate(55, 60)">
+    <!-- Background circle to improve contrast -->
+    <circle cx="15" cy="15" r="14" fill="rgba(0, 0, 0, 0.5)" />
+    <!-- Lens -->
+    <circle cx="15" cy="15" r="10" stroke="white" stroke-width="3" fill="none" />
+    <!-- Handle -->
+    <line x1="23" y1="21" x2="31" y2="29" stroke="white" stroke-width="3" stroke-linecap="round" />
+  </g>
+</svg>

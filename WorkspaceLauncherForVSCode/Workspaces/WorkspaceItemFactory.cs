@@ -24,7 +24,7 @@ namespace WorkspaceLauncherForVSCode.Workspaces
             WorkspaceStorage workspaceStorage,
             SettingsManager settingsManager,
             CommandContextItem refreshCommandContextItem,
-            CommandContextItem openExtensionSettingsLogsCommandContextItem)
+            CommandContextItem helpCommandContextItem)
         {
 #if DEBUG
             using var logger = new TimeLogger();
@@ -91,12 +91,10 @@ namespace WorkspaceLauncherForVSCode.Workspaces
                 MoreCommands =
                 [
                     new CommandContextItem(new OpenInExplorerCommand(workspace.WindowsPath ?? string.Empty, workspace, page)),
-                    new CommandContextItem(new PinWorkspaceCommand(workspace, page, workspaceStorage)),
+                    helpCommandContextItem,
                     new CommandContextItem(new CopyPathCommand(workspace.WindowsPath ?? string.Empty)),
                     refreshCommandContextItem,
-#if DEBUG
-                    openExtensionSettingsLogsCommandContextItem,
-#endif
+                    new CommandContextItem(new PinWorkspaceCommand(workspace, page, workspaceStorage)),
                 ]
             };
             return item;

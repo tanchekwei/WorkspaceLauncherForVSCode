@@ -17,7 +17,7 @@ public class VisualStudioCodeInstance
     public VisualStudioCodeInstallationType InstallationType { get; set; }
     public VisualStudioCodeType VisualStudioCodeType { get; set; }
     [JsonIgnore]
-    public IconInfo Icon => GetIcon();
+    public static IconInfo Icon => GetIcon();
 
     public VisualStudioCodeInstance() { }
     /// <summary>
@@ -41,15 +41,8 @@ public class VisualStudioCodeInstance
     /// Gets the icon associated with the Visual Studio Code instance.
     /// </summary>
     /// <returns>An icon representing the Visual Studio Code instance.</returns>
-    private IconInfo GetIcon()
+    private static IconInfo GetIcon()
     {
-        switch (VisualStudioCodeType)
-        {
-            case VisualStudioCodeType.Insider:
-                return Classes.Icon.VisualStudioCodeInsider;
-            case VisualStudioCodeType.Default:
-            default:
-                return Classes.Icon.VisualStudioCode;
-        }
+        return Classes.Icon.VisualStudioCode;
     }
 }

@@ -6,11 +6,15 @@ namespace WorkspaceLauncherForVSCode.Classes;
 
 public static class Icon
 {
+    public static readonly IconInfo Extension = IconHelpers.FromRelativePath(@"Assets\icon.svg");
     public static readonly IconInfo VisualStudio = IconHelpers.FromRelativePath(@"Assets\VisualStudioIcon.svg");
     public static readonly IconInfo VisualStudioCode = IconHelpers.FromRelativePath("Assets\\VisualStudioCodeIcon.svg");
     public static readonly IconInfo VisualStudioAndVisualStudioCode = IconHelpers.FromRelativePath("Assets\\VisualStudioAndVisualStudioCodeIcon.svg");
-    public static readonly IconInfo VisualStudioCodeInsider = IconHelpers.FromRelativePath("Assets\\VisualStudioCodeInsiderIcon.svg");
     public static readonly IconInfo FileExplorer = IconHelpers.FromRelativePath("Assets\\FileExplorer.svg");
+    public static readonly IconInfo GitHub = IconHelpers.FromRelativePath("Assets\\github-mark-white.svg");
     public static readonly IconInfo Pinned = new IconInfo("\ue718");
     public static readonly IconInfo Unpinned = new IconInfo("\ue77a");
+    public static readonly IconInfo Web = new("\uE774");
+    public static readonly IconInfo Help = new IconInfo("\uE897");
+    public static readonly IconInfo Info = new IconInfo("\uE946");
 }

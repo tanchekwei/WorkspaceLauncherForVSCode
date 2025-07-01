@@ -11,6 +11,7 @@ using WorkspaceLauncherForVSCode.Classes;
 using WorkspaceLauncherForVSCode.Commands;
 using WorkspaceLauncherForVSCode.Interfaces;
 using WorkspaceLauncherForVSCode.Listeners;
+using WorkspaceLauncherForVSCode.Pages;
 using WorkspaceLauncherForVSCode.Properties;
 using WorkspaceLauncherForVSCode.Workspaces;
 
@@ -34,9 +35,14 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
 
     private RefreshWorkspacesCommand _refreshWorkspacesCommand;
     private CommandContextItem _refreshWorkspacesCommandContextItem;
-    private CommandContextItem _openExtensionSettingsLogsCommandContextItem;
+    private CommandContextItem _helpCommandContextItem;
     private readonly IListItem[] _noResultsRefreshItem;
     private readonly IListItem[] _refreshSuggestionItem;
+    private readonly HelpPage _helpPage;
+
+    public event Action<int> TotalChanged;
+    public event Action<int> TotalVisualStudioChanged;
+    public event Action<int> TotalVisualStudioCodeChanged;
 
     public VisualStudioCodePage(SettingsManager settingsManager, IVisualStudioCodeService vscodeService, SettingsListener settingsListener)
     {
@@ -46,6 +52,7 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
 #endif
         this.Icon = Classes.Icon.VisualStudioAndVisualStudioCode;
         Name = Resource.page_command_name;
+        Id = "VisualStudioCodePage";
 
         _settingsManager = settingsManager;
         _vscodeService = vscodeService;
@@ -53,7 +60,12 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
         ShowDetails = _settingsManager.ShowDetails;
         _refreshWorkspacesCommand = new(_vscodeService, settingsManager, this);
         _refreshWorkspacesCommandContextItem = new CommandContextItem(_refreshWorkspacesCommand);
-        _openExtensionSettingsLogsCommandContextItem = new CommandContextItem(new OpenInExplorerCommand(Utilities.BaseSettingsPath(Constant.AppName), null, this, "Open extension settings / logs folder"));
+
+        _helpPage = new HelpPage();
+        TotalChanged += _helpPage.UpdateTotal;
+        TotalVisualStudioChanged += _helpPage.UpdateTotalVisualStudio;
+        TotalVisualStudioCodeChanged += _helpPage.UpdateTotalVisualStudioCode;
+        _helpCommandContextItem = new CommandContextItem(_helpPage);
         _settingsListener = settingsListener;
         _settingsListener.PageSettingsChanged += OnPageSettingsChanged;
         _noResultsRefreshItem = [
@@ -199,7 +211,12 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
             var workspaces = await workspacesTask;
             var solutions = solutionsTask != null ? await solutionsTask : new List<VisualStudioCodeWorkspace>();
 
+            TotalVisualStudioCodeChanged?.Invoke(workspaces.Count);
+            TotalVisualStudioChanged?.Invoke(solutions.Count);
+
             workspaces.AddRange(solutions);
+
+            TotalChanged?.Invoke(workspaces.Count);
 
             await _workspaceStorage.SaveWorkspacesAsync(workspaces);
             UpdateWorkspaceList(workspaces, cancellationToken);
@@ -232,7 +249,7 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
         using var logger = new TimeLogger();
 #endif
         var newItems = workspaces
-            .Select(w => WorkspaceItemFactory.Create(w, this, _workspaceStorage, _settingsManager, _refreshWorkspacesCommandContextItem, _openExtensionSettingsLogsCommandContextItem))
+            .Select(w => WorkspaceItemFactory.Create(w, this, _workspaceStorage, _settingsManager, _refreshWorkspacesCommandContextItem, _helpCommandContextItem))
             .ToList();
 
         lock (_itemsLock)
@@ -270,7 +287,7 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
                     workspace.PinDateTime = workspace.PinDateTime.HasValue ? null : DateTime.UtcNow;
                     if (_allItems.Remove(itemToUpdate))
                     {
-                        _allItems.Add(WorkspaceItemFactory.Create(workspace, this, _workspaceStorage, _settingsManager, _refreshWorkspacesCommandContextItem, _openExtensionSettingsLogsCommandContextItem));
+                        _allItems.Add(WorkspaceItemFactory.Create(workspace, this, _workspaceStorage, _settingsManager, _refreshWorkspacesCommandContextItem, _helpCommandContextItem));
                     }
 
                     _cachedFilteredItems = WorkspaceFilter.Filter(SearchText, _allItems, _settingsManager.SearchBy);
@@ -322,6 +339,9 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
         _settingsListener.PageSettingsChanged -= OnPageSettingsChanged;
+        TotalChanged -= _helpPage.UpdateTotal;
+        TotalVisualStudioChanged -= _helpPage.UpdateTotalVisualStudio;
+        TotalVisualStudioCodeChanged -= _helpPage.UpdateTotalVisualStudioCode;
         _workspaceStorage.Dispose();
         _refreshSemaphore.Dispose();
     }

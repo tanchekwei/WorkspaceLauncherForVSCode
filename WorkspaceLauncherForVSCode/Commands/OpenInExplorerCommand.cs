@@ -10,8 +10,8 @@ namespace WorkspaceLauncherForVSCode.Commands
     public sealed partial class OpenInExplorerCommand : InvokableCommand
     {
         private readonly VisualStudioCodeWorkspace? workspace;
-        private readonly VisualStudioCodePage page;
-        public OpenInExplorerCommand(string arguments, VisualStudioCodeWorkspace? workspace, VisualStudioCodePage page, string name = "Open in Explorer", string path = "explorer.exe", string? workingDir = null, OpenInShellHelper.ShellRunAsType runAs = OpenInShellHelper.ShellRunAsType.None, bool runWithHiddenWindow = false)
+        private readonly VisualStudioCodePage? page;
+        public OpenInExplorerCommand(string arguments, VisualStudioCodeWorkspace? workspace, VisualStudioCodePage? page, string name = "Open in Explorer", string path = "explorer.exe", string? workingDir = null, OpenInShellHelper.ShellRunAsType runAs = OpenInShellHelper.ShellRunAsType.None, bool runWithHiddenWindow = false)
         {
             Name = name;
             _path = path;

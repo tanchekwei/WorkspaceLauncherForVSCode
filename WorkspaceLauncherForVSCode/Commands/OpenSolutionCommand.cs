@@ -26,7 +26,7 @@ namespace WorkspaceLauncherForVSCode.Commands
         {
             if (Workspace.WindowsPath is not null)
             {
-                var pathNotFoundResult = CommandHelpers.IsPathNotFound(Workspace.WindowsPath);
+                var pathNotFoundResult = CommandHelpers.IsPathValid(Workspace.WindowsPath);
                 if (pathNotFoundResult != null)
                 {
                     return pathNotFoundResult;

@@ -7,11 +7,11 @@ namespace WorkspaceLauncherForVSCode.Commands
 {
     internal static class CommandHelpers
     {
-        public static CommandResult? IsPathNotFound(string path)
+        public static CommandResult? IsPathValid(string path)
         {
             if (!Directory.Exists(path) && !File.Exists(path))
             {
-                new ToastStatusMessage($"Path does not exist").Show();
+                new ToastStatusMessage($"Path does not exist: {path}").Show();
                 return CommandResult.KeepOpen();
             }
             return null;

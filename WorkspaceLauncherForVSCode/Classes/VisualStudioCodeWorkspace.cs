@@ -24,7 +24,7 @@ public class VisualStudioCodeWorkspace
     public VisualStudioCodeWorkspaceSource Source { get; set; }
     public List<string> SourcePath { get; set; } = new();
     public string WorkspaceName { get; set; } = "";
-    public string VSTypeString { get; set; } = "";
+    public VsCodeRemoteType VsCodeRemoteType { get; set; }
     public string WorkspaceTypeString { get; set; } = "";
     public DetailsElement[] Details { get; set; } = [];
     public int Frequency { get; set; }
@@ -100,11 +100,15 @@ public class VisualStudioCodeWorkspace
         if (Path == null) return;
         if (Path.StartsWith("vscode-remote://wsl", System.StringComparison.OrdinalIgnoreCase))
         {
-            VSTypeString = "WSL";
+            VsCodeRemoteType = VsCodeRemoteType.WSL;
         }
         else if (Path.StartsWith("vscode-remote://", System.StringComparison.OrdinalIgnoreCase))
         {
-            VSTypeString = "Remote";
+            VsCodeRemoteType = VsCodeRemoteType.Remote;
+        }
+        else
+        {
+            VsCodeRemoteType = VsCodeRemoteType.Local;
         }
     }
 
@@ -139,9 +143,9 @@ public class VisualStudioCodeWorkspace
     {
         if (Path == null) return;
         var typeTags = new List<Tag>() { new Tag(WorkspaceTypeString) };
-        if (VSTypeString != "")
+        if (VsCodeRemoteType != VsCodeRemoteType.Local)
         {
-            typeTags.Add(new Tag(VSTypeString));
+            typeTags.Add(new Tag(VsCodeRemoteType.ToString()));
         }
 
         var detailsElements = new List<DetailsElement>();
@@ -178,9 +182,9 @@ public class VisualStudioCodeWorkspace
     {
         if (Path == null) return;
         var typeTags = new List<Tag>() { new Tag(WorkspaceTypeString) };
-        if (VSTypeString != "")
+        if (VsCodeRemoteType != VsCodeRemoteType.Local)
         {
-            typeTags.Add(new Tag(VSTypeString));
+            typeTags.Add(new Tag(VsCodeRemoteType.ToString()));
         }
 
         var detailsElements = new List<DetailsElement>();

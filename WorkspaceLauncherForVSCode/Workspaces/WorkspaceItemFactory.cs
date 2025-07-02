@@ -66,9 +66,9 @@ namespace WorkspaceLauncherForVSCode.Workspaces
                     if (settingsManager.TagTypes.HasFlag(TagType.Type))
                     {
                         tags.Add(new Tag(workspace.WorkspaceTypeString));
-                        if (!string.IsNullOrEmpty(workspace.VSTypeString))
+                        if (workspace.VsCodeRemoteType != VsCodeRemoteType.Local)
                         {
-                            tags.Add(new Tag(workspace.VSTypeString));
+                            tags.Add(new Tag(workspace.VsCodeRemoteType.ToString()));
                         }
                     }
                     if (settingsManager.TagTypes.HasFlag(TagType.Target))
@@ -90,7 +90,9 @@ namespace WorkspaceLauncherForVSCode.Workspaces
                 Tags = tags.ToArray(),
                 MoreCommands =
                 [
-                    new CommandContextItem(new OpenInExplorerCommand(workspace.WindowsPath ?? string.Empty, workspace, page)),
+                    ..workspace.VsCodeRemoteType == VsCodeRemoteType.Remote || string.IsNullOrEmpty(workspace.WindowsPath)
+                        ? Array.Empty<CommandContextItem>()
+                        : [new CommandContextItem(new OpenInExplorerCommand(workspace.WindowsPath, workspace))],
                     helpCommandContextItem,
                     new CommandContextItem(new CopyPathCommand(workspace.WindowsPath ?? string.Empty)),
                     refreshCommandContextItem,

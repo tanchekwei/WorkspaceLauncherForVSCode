@@ -11,7 +11,7 @@ namespace WorkspaceLauncherForVSCode.Pages
 {
     public sealed partial class HelpPage : ListPage
     {
-        private static readonly ListItem _openSettingsItem = new ListItem(new OpenInExplorerCommand(Utilities.BaseSettingsPath(Constant.AppName), null, null, "Open extension settings / logs folder"));
+        private static readonly ListItem _openSettingsItem = new ListItem(new OpenInExplorerCommand(Utilities.BaseSettingsPath(Constant.AppName), null, "Open extension settings / logs folder"));
         private static readonly ListItem _viewSourceItem = new ListItem(new OpenUrlCommand("https://github.com/tanchekwei/WorkspaceLauncherForVSCode", "View source code", Classes.Icon.GitHub));
         private static readonly ListItem _reportBugItem = new ListItem(new OpenUrlCommand("https://github.com/tanchekwei/WorkspaceLauncherForVSCode/issues/new", "Report issue", Classes.Icon.GitHub));
         private int _total;

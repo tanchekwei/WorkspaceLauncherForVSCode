@@ -50,17 +50,18 @@ internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand, IH
             return CommandResult.Confirm(new ConfirmationArgs { Title = "Error", Description = "Cannot open a solution with this command." });
         }
 
-        if (Workspace.WindowsPath is null || Workspace.Path is null || Workspace.VSCodeInstance is null)
+        if (Workspace.Path is null || Workspace.VSCodeInstance is null)
         {
             return CommandResult.Confirm(new ConfirmationArgs { Title = "Error", Description = "Workspace path, or instance is null. Cannot open." });
         }
 
-        if (Workspace.VSTypeString != "WSL" && Workspace.VSTypeString != "Remote")
+        var pathToValidate = Workspace.WindowsPath ?? Workspace.Path;
+        if (Workspace.VsCodeRemoteType != VsCodeRemoteType.Remote)
         {
-            var pathNotFoundResult = CommandHelpers.IsPathNotFound(Workspace.WindowsPath);
-            if (pathNotFoundResult != null)
+            var pathInvalidResult = CommandHelpers.IsPathValid(pathToValidate);
+            if (pathInvalidResult != null)
             {
-                return pathNotFoundResult;
+                return pathInvalidResult;
             }
         }
 

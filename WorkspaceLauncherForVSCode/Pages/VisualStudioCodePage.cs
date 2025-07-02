@@ -58,14 +58,18 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
         _vscodeService = vscodeService;
         _workspaceStorage = new WorkspaceStorage();
         ShowDetails = _settingsManager.ShowDetails;
-        _refreshWorkspacesCommand = new(_vscodeService, settingsManager, this);
-        _refreshWorkspacesCommandContextItem = new CommandContextItem(_refreshWorkspacesCommand);
-
         _helpPage = new HelpPage();
         TotalChanged += _helpPage.UpdateTotal;
         TotalVisualStudioChanged += _helpPage.UpdateTotalVisualStudio;
         TotalVisualStudioCodeChanged += _helpPage.UpdateTotalVisualStudioCode;
         _helpCommandContextItem = new CommandContextItem(_helpPage);
+        _refreshWorkspacesCommand = new(_vscodeService, settingsManager, this);
+        _refreshWorkspacesCommandContextItem = new CommandContextItem(_refreshWorkspacesCommand)
+        {
+            MoreCommands = [
+                _helpCommandContextItem,
+            ]
+        };
         _settingsListener = settingsListener;
         _settingsListener.PageSettingsChanged += OnPageSettingsChanged;
         _noResultsRefreshItem = [

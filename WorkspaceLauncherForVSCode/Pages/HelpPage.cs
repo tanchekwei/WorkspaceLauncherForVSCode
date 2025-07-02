@@ -49,7 +49,7 @@ namespace WorkspaceLauncherForVSCode.Pages
                 },
                 new ListItem()
                 {
-                    Title = "1.11.0.0",
+                    Title = "1.12.0.0",
                     Subtitle = "Extension Version",
                     Icon = Classes.Icon.Extension,
                 },

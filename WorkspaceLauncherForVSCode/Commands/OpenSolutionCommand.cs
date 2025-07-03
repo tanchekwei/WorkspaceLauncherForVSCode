@@ -13,7 +13,7 @@ namespace WorkspaceLauncherForVSCode.Commands;
 public partial class OpenSolutionCommand : InvokableCommand, IHasWorkspace
 {
     public VisualStudioCodeWorkspace Workspace { get; set; }
-    private readonly VisualStudioCodePage page;
+    private readonly VisualStudioCodePage? page;
     private readonly CommandResultType commandResult;
     private readonly bool _elevated;
 
@@ -62,30 +62,21 @@ public partial class OpenSolutionCommand : InvokableCommand, IHasWorkspace
             if (window.Title.Contains(solutionName))
             {
                 window.SwitchToWindow();
-                return CommandResult.Dismiss();
+                return PageCommandResultHandler.HandleCommandResult(CommandResultType.Dismiss, page);
             }
         }
 
-        OpenInShellHelper.OpenInShell(Workspace.VSInstance.InstancePath, Workspace.Path, runAs: _elevated ? OpenInShellHelper.ShellRunAsType.Administrator : OpenInShellHelper.ShellRunAsType.None);
-
-        // Update frequency
-        Task.Run(() => page.UpdateFrequencyAsync(Workspace.Path));
-
-        switch (commandResult)
+        if (Workspace.VSInstance != null)
         {
-            case CommandResultType.GoBack:
-                return CommandResult.GoBack();
-            case CommandResultType.KeepOpen:
-                // reset search text
-                page.UpdateSearchText(page.SearchText, "");
-                page.SearchText = "";
-                return CommandResult.KeepOpen();
-            case CommandResultType.Dismiss:
-                page.UpdateSearchText(page.SearchText, "");
-                page.SearchText = "";
-                return CommandResult.Dismiss();
-            default:
-                return CommandResult.Dismiss();
+            OpenInShellHelper.OpenInShell(Workspace.VSInstance.InstancePath, Workspace.Path, runAs: _elevated ? OpenInShellHelper.ShellRunAsType.Administrator : OpenInShellHelper.ShellRunAsType.None);
         }
+
+        if (page != null)
+        {
+            // Update frequency
+            Task.Run(() => page.UpdateFrequencyAsync(Workspace.Path));
+        }
+
+        return PageCommandResultHandler.HandleCommandResult(commandResult, page);
     }
 }

@@ -3,11 +3,10 @@
 using System.Threading.Tasks;
 using Microsoft.CmdPal.Ext.System.Helpers;
 using Microsoft.CommandPalette.Extensions.Toolkit;
-using WorkspaceLauncherForVSCode.Commands;
 using WorkspaceLauncherForVSCode.Enums;
 using WorkspaceLauncherForVSCode.Interfaces;
 
-namespace WorkspaceLauncherForVSCode;
+namespace WorkspaceLauncherForVSCode.Commands;
 
 /// <summary>
 /// Command to open a Visual Studio Code workspace.
@@ -87,21 +86,6 @@ internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand, IH
         // Update frequency
         Task.Run(() => page.UpdateFrequencyAsync(Workspace.Path));
 
-        switch (commandResult)
-        {
-            case CommandResultType.GoBack:
-                return CommandResult.GoBack();
-            case CommandResultType.KeepOpen:
-                // reset search text
-                page.UpdateSearchText(page.SearchText, "");
-                page.SearchText = "";
-                return CommandResult.KeepOpen();
-            case CommandResultType.Dismiss:
-                page.UpdateSearchText(page.SearchText, "");
-                page.SearchText = "";
-                return CommandResult.Dismiss();
-            default:
-                return CommandResult.Dismiss();
-        }
+        return PageCommandResultHandler.HandleCommandResult(commandResult, page);
     }
 }

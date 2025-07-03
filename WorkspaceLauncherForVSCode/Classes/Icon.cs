@@ -17,4 +17,5 @@ public static class Icon
     public static readonly IconInfo Web = new("\uE774");
     public static readonly IconInfo Help = new IconInfo("\uE897");
     public static readonly IconInfo Info = new IconInfo("\uE946");
+    public static readonly IconInfo Setting = new IconInfo("\uE713");
 }

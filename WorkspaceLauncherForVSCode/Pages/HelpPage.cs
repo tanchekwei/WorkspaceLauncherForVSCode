@@ -14,14 +14,16 @@ namespace WorkspaceLauncherForVSCode.Pages
         private static readonly ListItem _openSettingsItem = new ListItem(new OpenInExplorerCommand(Utilities.BaseSettingsPath(Constant.AppName), null, "Open extension settings / logs folder"));
         private static readonly ListItem _viewSourceItem = new ListItem(new OpenUrlCommand("https://github.com/tanchekwei/WorkspaceLauncherForVSCode", "View source code", Classes.Icon.GitHub));
         private static readonly ListItem _reportBugItem = new ListItem(new OpenUrlCommand("https://github.com/tanchekwei/WorkspaceLauncherForVSCode/issues/new", "Report issue", Classes.Icon.GitHub));
+        private readonly ListItem _settingsItem;
         private int _total;
         private int _totalVisualStudio;
         private int _totalVisualStudioCode;
-        public HelpPage()
+        public HelpPage(SettingsManager settingsManager)
         {
             Name = "Help";
             Icon = Classes.Icon.Help;
             Id = "HelpPage";
+            _settingsItem = new ListItem(settingsManager.Settings.SettingsPage) { Title = "Setting", Icon = Classes.Icon.Setting };
         }
 
         public override IListItem[] GetItems()
@@ -53,6 +55,7 @@ namespace WorkspaceLauncherForVSCode.Pages
                     Subtitle = "Extension Version",
                     Icon = Classes.Icon.Extension,
                 },
+                _settingsItem,
                 _openSettingsItem,
             ];
         }

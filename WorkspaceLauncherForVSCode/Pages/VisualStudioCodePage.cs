@@ -58,7 +58,7 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
         _vscodeService = vscodeService;
         _workspaceStorage = new WorkspaceStorage();
         ShowDetails = _settingsManager.ShowDetails;
-        _helpPage = new HelpPage();
+        _helpPage = new HelpPage(_settingsManager);
         TotalChanged += _helpPage.UpdateTotal;
         TotalVisualStudioChanged += _helpPage.UpdateTotalVisualStudio;
         TotalVisualStudioCodeChanged += _helpPage.UpdateTotalVisualStudioCode;

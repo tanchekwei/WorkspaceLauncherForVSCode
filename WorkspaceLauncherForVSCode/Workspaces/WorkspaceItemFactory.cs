@@ -33,11 +33,12 @@ namespace WorkspaceLauncherForVSCode.Workspaces
             IconInfo icon;
             Details details;
             var tags = new List<Tag>();
+            List<CommandContextItem> moreCommands = new();
 
             switch (workspace.WorkspaceType)
             {
                 case WorkspaceType.Solution:
-                    command = new OpenSolutionCommand(workspace, page);
+                    command = new OpenSolutionCommand(workspace, page, settingsManager.CommandResult);
                     icon = Classes.Icon.VisualStudio;
                     workspace.WindowsPath = workspace.Path;
                     details = new Details
@@ -52,6 +53,22 @@ namespace WorkspaceLauncherForVSCode.Workspaces
                         {
                             tags.Add(new Tag(name));
                         }
+                    }
+                    if (settingsManager.VSSecondaryCommand == SecondaryCommand.OpenAsAdministrator)
+                    {
+                        moreCommands.Add(new CommandContextItem(new OpenSolutionCommand(workspace, page, settingsManager.CommandResult, elevated: true)));
+                        if (!string.IsNullOrEmpty(workspace.WindowsPath))
+                        {
+                            moreCommands.Add(new CommandContextItem(new OpenInExplorerCommand(workspace.WindowsPath, workspace)));
+                        }
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(workspace.WindowsPath))
+                        {
+                            moreCommands.Add(new CommandContextItem(new OpenInExplorerCommand(workspace.WindowsPath, workspace)));
+                        }
+                        moreCommands.Add(new CommandContextItem(new OpenSolutionCommand(workspace, page, settingsManager.CommandResult, elevated: true)));
                     }
                     break;
                 default:
@@ -78,8 +95,33 @@ namespace WorkspaceLauncherForVSCode.Workspaces
                             tags.Add(new Tag(name));
                         }
                     }
+
+                    if (workspace.VsCodeRemoteType != VsCodeRemoteType.Remote)
+                    {
+                        if (settingsManager.VSCodeSecondaryCommand == SecondaryCommand.OpenAsAdministrator)
+                        {
+                            moreCommands.Add(new CommandContextItem(new OpenVisualStudioCodeCommand(workspace, page, settingsManager.CommandResult, elevated: true)));
+                            if (!string.IsNullOrEmpty(workspace.WindowsPath))
+                            {
+                                moreCommands.Add(new CommandContextItem(new OpenInExplorerCommand(workspace.WindowsPath, workspace)));
+                            }
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(workspace.WindowsPath))
+                            {
+                                moreCommands.Add(new CommandContextItem(new OpenInExplorerCommand(workspace.WindowsPath, workspace)));
+                            }
+                            moreCommands.Add(new CommandContextItem(new OpenVisualStudioCodeCommand(workspace, page, settingsManager.CommandResult, elevated: true)));
+                        }
+                    }
                     break;
             }
+
+            moreCommands.Add(helpCommandContextItem);
+            moreCommands.Add(new CommandContextItem(new CopyPathCommand(workspace.WindowsPath ?? string.Empty)));
+            moreCommands.Add(refreshCommandContextItem);
+            moreCommands.Add(new CommandContextItem(new PinWorkspaceCommand(workspace, page, workspaceStorage)));
 
             var item = new ListItem(command)
             {
@@ -88,16 +130,7 @@ namespace WorkspaceLauncherForVSCode.Workspaces
                 Details = details,
                 Icon = icon,
                 Tags = tags.ToArray(),
-                MoreCommands =
-                [
-                    ..workspace.VsCodeRemoteType == VsCodeRemoteType.Remote || string.IsNullOrEmpty(workspace.WindowsPath)
-                        ? Array.Empty<CommandContextItem>()
-                        : [new CommandContextItem(new OpenInExplorerCommand(workspace.WindowsPath, workspace))],
-                    helpCommandContextItem,
-                    new CommandContextItem(new CopyPathCommand(workspace.WindowsPath ?? string.Empty)),
-                    refreshCommandContextItem,
-                    new CommandContextItem(new PinWorkspaceCommand(workspace, page, workspaceStorage)),
-                ]
+                MoreCommands = moreCommands.ToArray(),
             };
             return item;
         }

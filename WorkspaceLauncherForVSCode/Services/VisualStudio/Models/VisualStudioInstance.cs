@@ -21,11 +21,14 @@ namespace WorkspaceLauncherForVSCode.Services.VisualStudio.Models
 
         private string ApplicationPrivateSettingsPath { get; }
 
+        public string InstancePath { get; }
+
         public VisualStudioInstance(Json.VisualStudioInstance visualStudioInstance, string applicationPrivateSettingsPath)
         {
             ProductLineVersion = visualStudioInstance.Catalog.ProductLineVersion;
             IsPrerelease = visualStudioInstance.IsPrerelease;
             ApplicationPrivateSettingsPath = applicationPrivateSettingsPath;
+            InstancePath = visualStudioInstance.ProductPath;
         }
 
         public IEnumerable<CodeContainer> GetCodeContainers()

@@ -9,6 +9,9 @@ namespace WorkspaceLauncherForVSCode.Services.VisualStudio.Models.Json
         [JsonPropertyName("instanceId")]
         public string InstanceId { get; set; } = string.Empty;
 
+        [JsonPropertyName("productPath")]
+        public required string ProductPath { get; set; }
+
         [JsonPropertyName("isPrerelease")]
         public bool IsPrerelease { get; set; }
 

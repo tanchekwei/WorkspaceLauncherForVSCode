@@ -36,6 +36,18 @@ public class SettingsManager : JsonSettingsManager
         new ChoiceSetSetting.Choice("Both", nameof(SearchBy.Both)),
     ];
 
+    private static readonly List<ChoiceSetSetting.Choice> _vscodeSecondaryCommandChoices =
+    [
+        new ChoiceSetSetting.Choice("Open in Explorer", nameof(SecondaryCommand.OpenInExplorer)),
+        new ChoiceSetSetting.Choice("Run as Administrator", nameof(SecondaryCommand.OpenAsAdministrator)),
+    ];
+
+    private static readonly List<ChoiceSetSetting.Choice> _vsSecondaryCommandChoices =
+    [
+        new ChoiceSetSetting.Choice("Run as Administrator", nameof(SecondaryCommand.OpenAsAdministrator)),
+        new ChoiceSetSetting.Choice("Open in Explorer", nameof(SecondaryCommand.OpenInExplorer)),
+    ];
+
     private readonly ToggleSetting _enableLogging = new(
         Namespaced(nameof(EnableLogging)),
         "Enable Logging",
@@ -108,6 +120,18 @@ public class SettingsManager : JsonSettingsManager
         "Search by path, title or both.",
         _searchByChoices);
 
+    private readonly ChoiceSetSetting _vsSecondaryCommand = new(
+        Namespaced(nameof(VSSecondaryCommand)),
+        "Visual Studio Secondary Command",
+        "Configure the secondary command for Visual Studio solutions.",
+        _vsSecondaryCommandChoices);
+
+    private readonly ChoiceSetSetting _vscodeSecondaryCommand = new(
+        Namespaced(nameof(VSCodeSecondaryCommand)),
+        "Visual Studio Code Secondary Command",
+        "Configure the secondary command for Visual Studio Code workspaces.",
+        _vscodeSecondaryCommandChoices);
+
     private readonly TextSetting _pageSize = new(
         Namespaced(nameof(PageSize)),
         Resource.setting_pageSize_label,
@@ -178,6 +202,30 @@ public class SettingsManager : JsonSettingsManager
         }
     }
 
+    public SecondaryCommand VSSecondaryCommand
+    {
+        get
+        {
+            if (Enum.TryParse<SecondaryCommand>(_vsSecondaryCommand.Value, out var result))
+            {
+                return result;
+            }
+            return SecondaryCommand.OpenAsAdministrator;
+        }
+    }
+
+    public SecondaryCommand VSCodeSecondaryCommand
+    {
+        get
+        {
+            if (Enum.TryParse<SecondaryCommand>(_vscodeSecondaryCommand.Value, out var result))
+            {
+                return result;
+            }
+            return SecondaryCommand.OpenInExplorer;
+        }
+    }
+
     public int PageSize
     {
         get
@@ -213,6 +261,8 @@ public class SettingsManager : JsonSettingsManager
         Settings.Add(_commandResult);
         Settings.Add(_pageSize);
         Settings.Add(_searchBy);
+        Settings.Add(_vsSecondaryCommand);
+        Settings.Add(_vscodeSecondaryCommand);
         Settings.Add(_enableLogging);
 
         // Load settings from file upon initialization

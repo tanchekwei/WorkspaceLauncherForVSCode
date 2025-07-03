@@ -1,6 +1,7 @@
 ﻿// Modifications copyright (c) 2025 tanchekwei 
 // Licensed under the MIT License. See the LICENSE file in the project root for details.
 using System.Threading.Tasks;
+using Microsoft.CmdPal.Ext.System.Helpers;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using WorkspaceLauncherForVSCode.Commands;
 using WorkspaceLauncherForVSCode.Enums;
@@ -13,9 +14,9 @@ namespace WorkspaceLauncherForVSCode;
 /// </summary>
 internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand, IHasWorkspace
 {
-    public override string Name => "Open";
     private readonly VisualStudioCodePage page;
     private readonly CommandResultType commandResult;
+    private readonly bool _elevated;
 
     public VisualStudioCodeWorkspace Workspace { get; set; }
 
@@ -25,17 +26,22 @@ internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand, IH
     /// <param name="workspace">The Visual Studio Code workspace to open.</param>
     /// <param name="page">The Visual Studio Code page instance.</param>
     /// <param name="commandResult">The command result setting value.</param>
-    public OpenVisualStudioCodeCommand(VisualStudioCodeWorkspace workspace, VisualStudioCodePage page, CommandResultType commandResult)
+    public OpenVisualStudioCodeCommand(VisualStudioCodeWorkspace workspace, VisualStudioCodePage page, CommandResultType commandResult, bool elevated = false)
     {
         Workspace = workspace;
         this.page = page;
         this.commandResult = commandResult;
+        _elevated = elevated;
         this.Icon = Classes.Icon.VisualStudioCode;
-        Name += $" {workspace.WorkspaceType.ToString()}";
 
-        if (workspace.WorkspaceType == WorkspaceType.Solution)
+        if (elevated)
         {
-            //this.Subtitle = string.Empty;
+            Name = "Run as Administrator";
+            this.Icon = new("\uE7EF");
+        }
+        else
+        {
+            Name = $"Open";
         }
     }
 
@@ -76,7 +82,7 @@ internal sealed partial class OpenVisualStudioCodeCommand : InvokableCommand, IH
             arguments = $"--folder-uri \"{Workspace.Path}\"";
         }
 
-        ShellHelpers.OpenInShell(Workspace.VSCodeInstance.ExecutablePath, arguments, null, ShellHelpers.ShellRunAsType.None, false);
+        OpenInShellHelper.OpenInShell(Workspace.VSCodeInstance.ExecutablePath, arguments, runAs: _elevated ? OpenInShellHelper.ShellRunAsType.Administrator : OpenInShellHelper.ShellRunAsType.None);
 
         // Update frequency
         Task.Run(() => page.UpdateFrequencyAsync(Workspace.Path));

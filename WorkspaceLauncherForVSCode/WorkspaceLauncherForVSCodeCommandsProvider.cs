@@ -39,9 +39,10 @@ public partial class WorkspaceLauncherForVSCodeCommandsProvider : CommandProvide
 
     private void OnInstanceSettingsChanged(object? sender, System.EventArgs e)
     {
-        _vscodeService.LoadInstances(_settingsManager.EnabledEditions, _settingsManager.PreferredEdition);
-        _page.ClearAllItems();
-        _page.UpdateSearchText(_page.SearchText, "");
+#if DEBUG
+        using var logger = new TimeLogger();
+#endif
+        _page.StartRefresh();
     }
 
     public override ICommandItem[] TopLevelCommands()

@@ -1,5 +1,6 @@
 // Copyright (c) 2025 tanchekwei
 // Licensed under the MIT License. See the LICENSE file in the project root for details.
+using System.Reflection;
 using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using WorkspaceLauncherForVSCode.Classes;
@@ -51,7 +52,7 @@ namespace WorkspaceLauncherForVSCode.Pages
                 },
                 new ListItem()
                 {
-                    Title = "1.12.0.0",
+                    Title = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? string.Empty,
                     Subtitle = "Extension Version",
                     Icon = Classes.Icon.Extension,
                 },

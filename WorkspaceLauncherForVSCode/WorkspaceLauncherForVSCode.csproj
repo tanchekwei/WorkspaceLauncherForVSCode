@@ -16,6 +16,8 @@
     <PublishProfile>win-$(Platform).pubxml</PublishProfile>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
+
+    <AssemblyVersion>1.13.0.0</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\LargeTile.scale-125.png" />

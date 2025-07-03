@@ -113,13 +113,13 @@ public sealed partial class VisualStudioCodePage : DynamicListPage, IDisposable
 #if DEBUG
             using var logger = new TimeLogger();
 #endif
+            if (_allItems.Count == 0 && !IsLoading)
+            {
+                RefreshWorkspacesAsync(isUserInitiated: false).GetAwaiter().GetResult();
+            }
+
             lock (_itemsLock)
             {
-                if (_allItems.Count == 0 && !IsLoading)
-                {
-                    RefreshWorkspacesAsync(isUserInitiated: false).GetAwaiter().GetResult();
-                }
-
                 if (_visibleItems.Count == 0 && !IsLoading && !string.IsNullOrWhiteSpace(SearchText))
                 {
                     return _noResultsRefreshItem;
